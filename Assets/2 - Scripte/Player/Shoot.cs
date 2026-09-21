@@ -18,13 +18,11 @@ public class Shoot : MonoBehaviour
 
     void Update()
     {
+        if (GameManager.Instance.CurrentState != GameManager.GameState.Playing)
+            return; // nur schießen während des Spiels
+
         if (Input.GetKeyDown(shootKey))
         {
-            if (playerMovement != null && !playerMovement.HasStarted)
-            {
-                return;
-            }
-
             Fire();
         }
     }
