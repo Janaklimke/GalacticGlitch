@@ -21,7 +21,7 @@ public class PlayerMovement : MonoBehaviour
         if (GameManager.Instance.CurrentState == GameManager.GameState.GameOver)
             return; // nach Game Over keine Eingaben mehr
 
-        if (Input.GetKeyDown(KeyCode.Space) || Input.GetMouseButtonDown(0))
+        if (Input.GetKeyDown(KeyCode.Space))
         {
             if (GameManager.Instance.CurrentState == GameManager.GameState.Menu)
             {
