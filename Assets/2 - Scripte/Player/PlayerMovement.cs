@@ -10,7 +10,7 @@ public class PlayerMovement : MonoBehaviour
     public float startingGravityScale = 0f;
 
     private Rigidbody2D rb;
-    private bool hasStarted = false;
+    public bool HasStarted { get; private set; } = false;
 
     void Start()
     {
@@ -21,9 +21,9 @@ public class PlayerMovement : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Space) || Input.GetMouseButtonDown(0))
+        if (Input.GetKeyDown(KeyCode.Space))
         {
-            if (!hasStarted)
+            if (!HasStarted)
             {
                 StartGame();
             }
@@ -34,7 +34,7 @@ public class PlayerMovement : MonoBehaviour
 
     void StartGame()
     {
-        hasStarted = true;
+        HasStarted = true;
         rb.gravityScale = gravityScale;
     }
 
