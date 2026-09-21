@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 7bd45896fbd2a1f4c9ad2ce8bd6dd982
+guid: 0792322c08ae84a46884b82f0104a3a4
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -8475668611921180720
-    second: Appa_glitch_0
+      213: 6722565221998066254
+    second: Appa_Shooting_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -126,13 +126,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Appa_glitch_0
+      name: Appa_Shooting_0
       rect:
         serializedVersion: 2
-        x: 9
-        y: 11
-        width: 43
-        height: 45
+        x: 16
+        y: 4
+        width: 46
+        height: 53
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -141,8 +141,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 0d78280bd40606a80800000000000000
-      internalID: -8475668611921180720
+      spriteID: e4af694a3795b4d50800000000000000
+      internalID: 6722565221998066254
       vertices: []
       indices: 
       edges: []
@@ -161,7 +161,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Appa_glitch_0: -8475668611921180720
+      Appa_Shooting_0: 6722565221998066254
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
