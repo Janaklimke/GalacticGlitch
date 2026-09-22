@@ -8,10 +8,10 @@ public class PlayerMovement : MonoBehaviour
     public float startingGravityScale = 0f;
 
     [Header("Animation")]
-    public Animator animator; // steuert "space pressed" (Leertaste-gedrückt-Trigger) und "death" (Bool)
+    public Animator animator;
 
     private Rigidbody2D rb;
-    private Glitchdash glitchdash; // NEU: um während des Dashs die Jump-Animation zu unterdrücken
+    private Glitchdash glitchdash;
 
     void Start()
     {
@@ -19,10 +19,8 @@ public class PlayerMovement : MonoBehaviour
         rb.gravityScale = startingGravityScale;
         rb.linearVelocity = Vector2.zero;
 
-        // NEU: Falls im Inspector nicht gesetzt, eigenen Animator verwenden
         if (animator == null) animator = GetComponent<Animator>();
 
-        // NEU: Glitchdash cachen, um während des Dashs die Jump-Animation zu unterdrücken
         glitchdash = GetComponent<Glitchdash>();
     }
 
@@ -48,8 +46,6 @@ public class PlayerMovement : MonoBehaviour
         rb.linearVelocity = new Vector2(rb.linearVelocity.x, 0f);
         rb.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
 
-        // Trigger-Parameter "space pressed" feuert bei jedem Leertaste-Druck -> Übergang zu "fly"
-        // NEU: nur, wenn gerade NICHT gedasht wird, damit die glitch-Animation nicht unterbrochen/abgebrochen wirkt
         if (animator != null && (glitchdash == null || !glitchdash.IsInvincible))
         {
             animator.SetTrigger("space pressed");
@@ -60,8 +56,10 @@ public class PlayerMovement : MonoBehaviour
     {
         if (collision.gameObject.CompareTag("Asteroid") || collision.gameObject.CompareTag("Ground"))
         {
-            // NEU: Bool-Parameter "death" setzen -> Übergang zu "death"
             if (animator != null) animator.SetBool("death", true);
+
+            rb.gravityScale = startingGravityScale;
+            rb.linearVelocity = Vector2.zero;
 
             GameManager.Instance.GameOver();
         }
