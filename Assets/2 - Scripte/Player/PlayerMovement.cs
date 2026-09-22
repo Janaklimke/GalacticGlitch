@@ -5,12 +5,9 @@ public class PlayerMovement : MonoBehaviour
     [Header("Movement Settings")]
     public float jumpForce = 5f;
     public float gravityScale = 2.5f;
-
-    [Header("Start Settings")]
     public float startingGravityScale = 0f;
 
     private Rigidbody2D rb;
-    private bool hasStarted = false;
 
     void Start()
     {
@@ -21,26 +18,32 @@ public class PlayerMovement : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Space) || Input.GetMouseButtonDown(0))
+        if (GameManager.Instance.CurrentState == GameManager.GameState.GameOver)
+            return; // nach Game Over keine Eingaben mehr
+
+        if (Input.GetKeyDown(KeyCode.Space))
         {
-            if (!hasStarted)
+            if (GameManager.Instance.CurrentState == GameManager.GameState.Menu)
             {
-                StartGame();
+                GameManager.Instance.StartGame();
+                rb.gravityScale = gravityScale;
             }
 
             Jump();
         }
     }
 
-    void StartGame()
-    {
-        hasStarted = true;
-        rb.gravityScale = gravityScale;
-    }
-
     void Jump()
     {
         rb.linearVelocity = new Vector2(rb.linearVelocity.x, 0f);
         rb.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
+    }
+
+    void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (collision.gameObject.CompareTag("Asteroid") || collision.gameObject.CompareTag("Ground"))
+        {
+            GameManager.Instance.GameOver();
+        }
     }
 }
