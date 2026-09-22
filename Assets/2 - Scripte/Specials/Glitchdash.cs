@@ -6,16 +6,25 @@ public class Glitchdash : MonoBehaviour
     public string glitchTag = "Glitch";    // tag on the collectible
 
     [Header("World scroll")]
-    public float baseSpeed = 4f;           // normal scroll speed (units/sec)
-    public float dashSpeed = 10f;          // scroll speed while dashing
+    public float baseSpeed = 4f;           // fallback, falls kein Spawner in der Szene ist
+    [Tooltip("Dash-Speed ist relativ zur aktuellen (wachsenden) Spawner-Speed, kein fester Wert")]
+    public float dashSpeedMultiplier = 2.5f; // z.B. 2.5 = Dash ist 2.5x so schnell wie die aktuelle normale Speed
     public float speedSmoothing = 8f;      // how quickly speed eases between the two
 
     [Header("Dash / invincibility")]
     public float dashDuration = 1.2f;
     public float invincibleExtraTime = 0.3f; // invincibility lasts a bit longer than the dash
 
+    [Header("Collision")]
+    [Tooltip("Der Haupt-Collider für Kollisionen mit Asteroiden (NICHT der kleine Trigger-Collider fürs Glitch-Pickup). Wird während Invincibility zum Trigger, damit man ungehindert durchfliegt.")]
+    public Collider2D playerCollider;
+
+    [Header("Animation")]
+    public Animator animator; // NEU: steuert den "glitch"-Trigger im Animator Controller
+
     // Everything that scrolls reads this
     public static float WorldSpeed { get; private set; }
+    public static float BaseWorldSpeed { get; private set; } // Referenzwert für Multiplikator-Berechnung im Spawner
 
     public bool IsDashing => dashTimer > 0f;
     public bool IsInvincible => invincibleTimer > 0f;
@@ -28,7 +37,12 @@ public class Glitchdash : MonoBehaviour
     void Awake()
     {
         WorldSpeed = baseSpeed;
+        BaseWorldSpeed = baseSpeed;
         sr = GetComponentInChildren<SpriteRenderer>();
+
+        if (playerCollider == null) playerCollider = GetComponent<Collider2D>();
+
+        if (animator == null) animator = GetComponent<Animator>();
     }
 
     void Update()
@@ -38,9 +52,16 @@ public class Glitchdash : MonoBehaviour
         dashTimer -= Time.deltaTime;
         invincibleTimer -= Time.deltaTime;
 
-        // Ease toward the target speed so the dash feels like a burst, not a snap
-        float target = IsDashing ? dashSpeed : baseSpeed;
+        float normalSpeed = spawner.SpawnerActive ? spawner.CurrentDifficultySpeed : baseSpeed;
+        BaseWorldSpeed = normalSpeed;
+
+        float target = IsDashing ? normalSpeed * dashSpeedMultiplier : normalSpeed;
         WorldSpeed = Mathf.Lerp(WorldSpeed, target, speedSmoothing * Time.deltaTime);
+
+        if (playerCollider != null)
+        {
+            playerCollider.isTrigger = IsInvincible;
+        }
 
         // Flicker while invincible so the player can see it
         if (sr != null)
@@ -63,9 +84,10 @@ public class Glitchdash : MonoBehaviour
 
     void CollectGlitch(GameObject glitch)
     {
-        // Refreshes the timers if you grab another one mid-dash
         dashTimer = dashDuration;
         invincibleTimer = dashDuration + invincibleExtraTime;
+
+        if (animator != null) animator.SetTrigger("glitch");
 
         Destroy(glitch);
     }

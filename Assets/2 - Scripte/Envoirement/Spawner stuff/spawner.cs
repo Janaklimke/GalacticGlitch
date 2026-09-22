@@ -43,13 +43,22 @@ public class spawner : MonoBehaviour
     private float timer;
     private float nextSpawnTime;
 
-    // Trackt alle aktuell aktiven, vom Spawner bewegten Objekte
     private List<GameObject> activeObjects = new List<GameObject>();
+
+    public static float CurrentDifficultySpeed { get; private set; }
+    public static bool SpawnerActive { get; private set; }
 
     void Start()
     {
         currentSpeed = startSpeed;
+        CurrentDifficultySpeed = currentSpeed; // NEU
+        SpawnerActive = true; // NEU
         SetNextSpawnTime();
+    }
+
+    void OnDestroy()
+    {
+        SpawnerActive = false; // NEU
     }
 
     void Update()
@@ -63,9 +72,13 @@ public class spawner : MonoBehaviour
             currentSpeed = Mathf.Min(currentSpeed, maxSpeed);
         }
 
-        MoveActiveObjects();
+        CurrentDifficultySpeed = currentSpeed;
 
-        timer += Time.deltaTime;
+        float dashMultiplier = GetDashMultiplier();
+
+        MoveActiveObjects(dashMultiplier);
+
+        timer += Time.deltaTime * dashMultiplier;
         if (timer >= nextSpawnTime)
         {
             timer = 0f;
@@ -74,8 +87,17 @@ public class spawner : MonoBehaviour
         }
     }
 
-    void MoveActiveObjects()
+    float GetDashMultiplier()
     {
+        return (Glitchdash.BaseWorldSpeed > 0f)
+            ? Glitchdash.WorldSpeed / Glitchdash.BaseWorldSpeed
+            : 1f;
+    }
+
+    void MoveActiveObjects(float dashMultiplier)
+    {
+        float effectiveSpeed = currentSpeed * dashMultiplier;
+
         for (int i = activeObjects.Count - 1; i >= 0; i--)
         {
             GameObject obj = activeObjects[i];
@@ -86,7 +108,7 @@ public class spawner : MonoBehaviour
                 continue;
             }
 
-            obj.transform.Translate(Vector2.left * currentSpeed * Time.deltaTime);
+            obj.transform.Translate(Vector2.left * effectiveSpeed * Time.deltaTime);
         }
     }
 
@@ -168,7 +190,6 @@ public class spawner : MonoBehaviour
 
     SpawnableObject GetRandomWeightedObject()
     {
-        // Nur Objekte berücksichtigen, die ihr Limit noch nicht erreicht haben
         List<SpawnableObject> available = spawnableObjects.FindAll(
             obj => obj.activeInstances.Count < obj.maxActiveCount
         );
