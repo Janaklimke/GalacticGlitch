@@ -9,11 +9,17 @@ public class Shoot : MonoBehaviour
     public float projectileGravityScale = 0f;
     public KeyCode shootKey = KeyCode.Mouse0;
 
+    [Header("Animation")]
+    public Animator animator; // NEU: steuert den "pew"-Trigger
+
     private PlayerMovement playerMovement;
 
     void Start()
     {
         playerMovement = GetComponent<PlayerMovement>();
+
+        // NEU: Falls im Inspector nicht gesetzt, eigenen Animator verwenden
+        if (animator == null) animator = GetComponent<Animator>();
     }
 
     void Update()
@@ -47,5 +53,7 @@ public class Shoot : MonoBehaviour
         {
             Debug.LogWarning("Kein Rigidbody2D am Projectile gefunden!");
         }
+
+        if (animator != null) animator.SetTrigger("pew");
     }
 }

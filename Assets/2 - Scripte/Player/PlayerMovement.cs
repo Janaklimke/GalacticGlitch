@@ -8,9 +8,10 @@ public class PlayerMovement : MonoBehaviour
     public float startingGravityScale = 0f;
 
     [Header("Animation")]
-    public Animator animator; // NEU: steuert "space pre" (Jump-Trigger) und "death" (Bool)
+    public Animator animator; // steuert "space pressed" (Leertaste-gedrückt-Trigger) und "death" (Bool)
 
     private Rigidbody2D rb;
+    private Glitchdash glitchdash; // NEU: um während des Dashs die Jump-Animation zu unterdrücken
 
     void Start()
     {
@@ -20,6 +21,9 @@ public class PlayerMovement : MonoBehaviour
 
         // NEU: Falls im Inspector nicht gesetzt, eigenen Animator verwenden
         if (animator == null) animator = GetComponent<Animator>();
+
+        // NEU: Glitchdash cachen, um während des Dashs die Jump-Animation zu unterdrücken
+        glitchdash = GetComponent<Glitchdash>();
     }
 
     void Update()
@@ -44,8 +48,12 @@ public class PlayerMovement : MonoBehaviour
         rb.linearVelocity = new Vector2(rb.linearVelocity.x, 0f);
         rb.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
 
-        // NEU: Trigger-Parameter "space pre" feuern -> Übergang zu "fly"
-        if (animator != null) animator.SetTrigger("space pre");
+        // Trigger-Parameter "space pressed" feuert bei jedem Leertaste-Druck -> Übergang zu "fly"
+        // NEU: nur, wenn gerade NICHT gedasht wird, damit die glitch-Animation nicht unterbrochen/abgebrochen wirkt
+        if (animator != null && (glitchdash == null || !glitchdash.IsInvincible))
+        {
+            animator.SetTrigger("space pressed");
+        }
     }
 
     void OnCollisionEnter2D(Collision2D collision)
