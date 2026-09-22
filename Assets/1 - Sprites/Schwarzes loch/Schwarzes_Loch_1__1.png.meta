@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 72f84107bf289d74280788e966935fd0
+guid: ebc567d7680a95648a024664d77c97ac
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -6201312559362691778
-    second: Asteroid_Small_04_0
+      213: 5122758152059337518
+    second: Schwarzes_Loch_1__1_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -37,7 +37,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 0
+    filterMode: 1
     aniso: 1
     mipBias: 0
     wrapU: 1
@@ -97,7 +97,7 @@ TextureImporter:
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
   - serializedVersion: 4
-    buildTarget: WindowsStoreApps
+    buildTarget: WebGL
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
@@ -110,7 +110,7 @@ TextureImporter:
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
   - serializedVersion: 4
-    buildTarget: WebGL
+    buildTarget: WindowsStoreApps
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
@@ -126,13 +126,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Asteroid_Small_04_0
+      name: Schwarzes_Loch_1__1_0
       rect:
         serializedVersion: 2
-        x: 0
-        y: 0
-        width: 16
-        height: 16
+        x: 4
+        y: 6
+        width: 58
+        height: 45
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -141,8 +141,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: e3da40e451380f9a0800000000000000
-      internalID: -6201312559362691778
+      spriteID: e2bbbb3d561b71740800000000000000
+      internalID: 5122758152059337518
       vertices: []
       indices: 
       edges: []
@@ -161,7 +161,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Asteroid_Small_04_0: -6201312559362691778
+      Schwarzes_Loch_1__1_0: 5122758152059337518
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
