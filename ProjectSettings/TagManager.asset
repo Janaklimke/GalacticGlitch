@@ -4,19 +4,18 @@
 TagManager:
   serializedVersion: 3
   tags:
+  - Glitch
+  - Hazard
   - Bullet
-  - Ground
-  - Asteroid
-  - DestroyZone
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - Player/Obstacles
   - Water
   - UI
   - 
-  - 
+  - Background
   - 
   - 
   - 
