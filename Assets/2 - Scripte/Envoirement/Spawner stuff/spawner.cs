@@ -176,19 +176,16 @@ public class spawner : MonoBehaviour
             // Gesamtes Limit pro Line erreicht?
             if (totalSpawnedInWave >= maxTotalPerWave) break;
 
-            // 1. Objekt basierend auf Chancen und Gruppen-Limits wählen
-            SpawnableObject chosen = GetRandomWeightedObject(spawnedGroupCounts);
-            if (chosen == null) continue;
+            // 1. Objekt wählen — NUR aus Objekten, die aktuell auch wirklich irgendwo
+            //    reinpassen (Größe + evtl. feste Spawnpunkte + belegte Slots werden
+            //    hier schon berücksichtigt). Der passende Slot wird direkt mit gewählt.
+            SpawnableObject chosen = GetRandomWeightedObject(spawnedGroupCounts, occupied, out int startIndex);
 
-            // 2. Erlaubte Slots ermitteln
-            int[] allowedIndices = chosen.useSpecificSpawnPoints
-                ? GetAllowedIndices(chosen)
-                : null;
+            // Kein Objekt mehr wählbar, das irgendwo Platz hätte -> für diese Wave abbrechen,
+            // weitere Versuche würden am selben "occupied"-Zustand ohnehin scheitern.
+            if (chosen == null || startIndex == -1) break;
 
-            int startIndex = FindFreeSlotRange(occupied, chosen.sizeInSlots, allowedIndices);
-            if (startIndex == -1) continue; // Kein freier Platz frei
-
-            // Slots testen
+            // Slots belegen
             for (int i = startIndex; i < startIndex + chosen.sizeInSlots; i++)
             {
                 if (i < occupied.Length) occupied[i] = true;
@@ -287,50 +284,78 @@ public class spawner : MonoBehaviour
         return validStarts;
     }
 
-    SpawnableObject GetRandomWeightedObject(Dictionary<ObjectGroup, int> spawnedGroupCounts)
+    /// <summary>
+    /// Wählt ein Objekt per Gewichtung, aber NUR aus Objekten, die aktuell
+    /// tatsächlich einen freien Slot-Bereich haben (Größe, feste Spawnpunkte
+    /// und bereits belegte Slots werden vorab geprüft). Gibt direkt den
+    /// gewählten Startindex für dieses Objekt mit zurück, damit "Objekt wählen"
+    /// und "Slot dafür wählen" nicht mehr auseinanderfallen können.
+    /// </summary>
+    SpawnableObject GetRandomWeightedObject(Dictionary<ObjectGroup, int> spawnedGroupCounts, bool[] occupied, out int startIndex)
     {
-        List<SpawnableObject> available = spawnableObjects.FindAll(obj =>
+        startIndex = -1;
+
+        // Für jedes Objekt direkt mit ermitteln, welche Startindizes für es frei wären.
+        List<(SpawnableObject obj, List<int> validStarts)> available = new List<(SpawnableObject, List<int>)>();
+
+        foreach (var obj in spawnableObjects)
         {
+            // spawnChance <= 0 heißt: dieses Objekt ist komplett deaktiviert
+            // (z.B. zum gezielten Testen eines einzelnen Objekts). Muss vor
+            // allen anderen Checks raus, sonst kann es über minPerWave/priorityList
+            // trotzdem noch gewählt werden.
+            if (obj.spawnChance <= 0f) continue;
+
             // Max Active Check in der Szene
-            if (obj.activeInstances.Count >= obj.maxActiveCount) return false;
+            if (obj.activeInstances.Count >= obj.maxActiveCount) continue;
 
             // Gruppen-Regel Check pro Wave
             GroupWaveRule rule = groupRules.Find(r => r.group == obj.group);
             if (rule != null)
             {
                 int currentInWave = spawnedGroupCounts.ContainsKey(obj.group) ? spawnedGroupCounts[obj.group] : 0;
-                if (currentInWave >= rule.maxPerWave) return false;
+                if (currentInWave >= rule.maxPerWave) continue;
             }
 
-            return true;
-        });
+            // NEU: Objekt nur berücksichtigen, wenn es aktuell auch wirklich irgendwo passt.
+            int[] allowedIndices = obj.useSpecificSpawnPoints ? GetAllowedIndices(obj) : null;
+            List<int> validStarts = GetValidStartIndices(occupied, obj.sizeInSlots, allowedIndices);
+            if (validStarts.Count == 0) continue;
+
+            available.Add((obj, validStarts));
+        }
 
         if (available.Count == 0) return null;
 
-        // Priorisierung bei minPerWave
-        List<SpawnableObject> priorityList = available.FindAll(obj =>
+        // Priorisierung bei minPerWave (nur unter den tatsächlich platzierbaren Objekten)
+        List<(SpawnableObject obj, List<int> validStarts)> priorityList = available.FindAll(entry =>
         {
-            GroupWaveRule rule = groupRules.Find(r => r.group == obj.group);
+            GroupWaveRule rule = groupRules.Find(r => r.group == entry.obj.group);
             if (rule != null && rule.minPerWave > 0)
             {
-                int currentInWave = spawnedGroupCounts.ContainsKey(obj.group) ? spawnedGroupCounts[obj.group] : 0;
+                int currentInWave = spawnedGroupCounts.ContainsKey(entry.obj.group) ? spawnedGroupCounts[entry.obj.group] : 0;
                 return currentInWave < rule.minPerWave;
             }
             return false;
         });
 
-        List<SpawnableObject> selectionPool = priorityList.Count > 0 ? priorityList : available;
+        List<(SpawnableObject obj, List<int> validStarts)> selectionPool = priorityList.Count > 0 ? priorityList : available;
 
         float totalWeight = 0f;
-        foreach (var obj in selectionPool) totalWeight += obj.spawnChance;
+        foreach (var entry in selectionPool) totalWeight += entry.obj.spawnChance;
 
         float randomValue = Random.Range(0f, totalWeight);
         float cumulative = 0f;
 
-        foreach (var obj in selectionPool)
+        foreach (var entry in selectionPool)
         {
-            cumulative += obj.spawnChance;
-            if (randomValue <= cumulative) return obj;
+            cumulative += entry.obj.spawnChance;
+            if (randomValue <= cumulative)
+            {
+                // 2. Slot für dieses Objekt wählen, aus seinen bereits ermittelten freien Startindizes
+                startIndex = entry.validStarts[Random.Range(0, entry.validStarts.Count)];
+                return entry.obj;
+            }
         }
 
         return null;
