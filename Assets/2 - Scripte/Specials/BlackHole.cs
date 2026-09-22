@@ -11,10 +11,13 @@ public class BlackHole : MonoBehaviour
 
     void FixedUpdate()
     {
+
         Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, pullRadius);
+        Debug.Log("Hits in range: " + hits.Length);
 
         foreach (Collider2D hit in hits)
         {
+            Debug.Log("Found player, applying force");
             Glitchdash player = hit.GetComponentInParent<Glitchdash>();
             if (player == null) continue;
 
