@@ -57,8 +57,8 @@ public class spawner : MonoBehaviour
     public List<GroupWaveRule> groupRules = new List<GroupWaveRule>();
 
     [Header("Spawn Line Limits")]
-    [Tooltip("Maximale Gesamtzahl an Objekten (egal welcher Typ) pro Spawn Line")]
-    public int maxTotalPerWave = 4;
+    [Tooltip("Maximale Gesamtzahl an belegten Slots pro Spawn Line (z.B. max 2 von 4 Slots belegen)")]
+    public int maxOccupiedSlotsPerWave = 2;
 
     [Header("Spawn Points")]
     public Transform[] spawnPoints;
@@ -161,76 +161,73 @@ public class spawner : MonoBehaviour
         CleanupActiveInstances();
 
         bool[] occupied = new bool[spawnPoints.Length];
-        
-        // Zufällige Anzahl an Versuchen für diese Line (maximal begrenzt durch maxTotalPerWave)
-        int attemptsThisWave = Random.Range(1, maxTotalPerWave + 1);
-
         Dictionary<ObjectGroup, int> spawnedGroupCounts = new Dictionary<ObjectGroup, int>();
-        int totalSpawnedInWave = 0;
+        
+        int occupiedSlotsInWave = 0;
 
-        for (int attempt = 0; attempt < attemptsThisWave; attempt++)
+        // 1. ZUERST MINDEST-ANFORDERUNGEN DER GRUPPEN SPANWEN (minPerWave)
+        foreach (var rule in groupRules)
         {
-            // Ab dem 2. Objekt entscheidet die Multi-Spawn-Chance, ob noch eins hinzugefügt wird
-            if (Random.value > multiSpawnChance && attempt > 0) break;
+            if (rule.minPerWave <= 0) continue;
 
-            // Gesamtes Limit pro Line erreicht?
-            if (totalSpawnedInWave >= maxTotalPerWave) break;
+            for (int i = 0; i < rule.minPerWave; i++)
+            {
+                if (occupiedSlotsInWave >= maxOccupiedSlotsPerWave) break;
 
-            // 1. Objekt wählen — NUR aus Objekten, die aktuell auch wirklich irgendwo
-            //    reinpassen (Größe + evtl. feste Spawnpunkte + belegte Slots werden
-            //    hier schon berücksichtigt). Der passende Slot wird direkt mit gewählt.
+                SpawnableObject chosen = GetRandomObjectFromGroup(rule.group, spawnedGroupCounts, occupied, out int startIndex);
+                if (chosen != null && startIndex != -1)
+                {
+                    ExecuteSpawn(chosen, startIndex, occupied, spawnedGroupCounts, ref occupiedSlotsInWave);
+                }
+            }
+        }
+
+        // 2. OPTIONALE WEITERE OBJEKTE PER CHANCE HINZUFÜGEN
+        // Entscheidet per multiSpawnChance, ob überhaupt mehr als das Minimum gespawnt werden soll
+        int maxAttempts = spawnPoints.Length;
+        for (int attempt = 0; attempt < maxAttempts; attempt++)
+        {
+            // Ab dem 1. optionalen Objekt bestimmt die multiSpawnChance das Abbrechen
+            if (attempt > 0 && Random.value > multiSpawnChance) break;
+
+            if (occupiedSlotsInWave >= maxOccupiedSlotsPerWave) break;
+
             SpawnableObject chosen = GetRandomWeightedObject(spawnedGroupCounts, occupied, out int startIndex);
-
-            // Kein Objekt mehr wählbar, das irgendwo Platz hätte -> für diese Wave abbrechen,
-            // weitere Versuche würden am selben "occupied"-Zustand ohnehin scheitern.
             if (chosen == null || startIndex == -1) break;
 
-            // Slots belegen
-            for (int i = startIndex; i < startIndex + chosen.sizeInSlots; i++)
-            {
-                if (i < occupied.Length) occupied[i] = true;
-            }
-
-            // Verhindern, dass die gesamte Line dicht gemacht wird (mind. 1 Ausweichplatz)
-            if (IsEntireLineBlocked(occupied))
-            {
-                for (int i = startIndex; i < startIndex + chosen.sizeInSlots; i++)
-                {
-                    if (i < occupied.Length) occupied[i] = false;
-                }
-                continue;
-            }
-
-            // Objekt spawnen
-            Vector3 spawnPos = spawnPoints[startIndex].position;
-            if (chosen.sizeInSlots > 1)
-            {
-                int lastSlot = Mathf.Min(startIndex + chosen.sizeInSlots - 1, spawnPoints.Length - 1);
-                Vector3 posA = spawnPoints[startIndex].position;
-                Vector3 posB = spawnPoints[lastSlot].position;
-                spawnPos = (posA + posB) / 2f;
-            }
-
-            GameObject spawned = Instantiate(chosen.prefab, spawnPos, Quaternion.identity);
-            activeObjects.Add(spawned);
-            chosen.activeInstances.Add(spawned);
-
-            // Zähler aktualisieren
-            if (!spawnedGroupCounts.ContainsKey(chosen.group))
-                spawnedGroupCounts[chosen.group] = 0;
-
-            spawnedGroupCounts[chosen.group]++;
-            totalSpawnedInWave++;
+            ExecuteSpawn(chosen, startIndex, occupied, spawnedGroupCounts, ref occupiedSlotsInWave);
         }
     }
 
-    bool IsEntireLineBlocked(bool[] occupied)
+    void ExecuteSpawn(SpawnableObject chosen, int startIndex, bool[] occupied, Dictionary<ObjectGroup, int> spawnedGroupCounts, ref int occupiedSlots)
     {
-        for (int i = 0; i < occupied.Length; i++)
+        // Slots im Array als belegt markieren
+        for (int i = startIndex; i < startIndex + chosen.sizeInSlots; i++)
         {
-            if (!occupied[i]) return false;
+            if (i < occupied.Length) occupied[i] = true;
         }
-        return true;
+
+        // Position berechnen
+        Vector3 spawnPos = spawnPoints[startIndex].position;
+        if (chosen.sizeInSlots > 1)
+        {
+            int lastSlot = Mathf.Min(startIndex + chosen.sizeInSlots - 1, spawnPoints.Length - 1);
+            Vector3 posA = spawnPoints[startIndex].position;
+            Vector3 posB = spawnPoints[lastSlot].position;
+            spawnPos = (posA + posB) / 2f;
+        }
+
+        // Instanziieren
+        GameObject spawned = Instantiate(chosen.prefab, spawnPos, Quaternion.identity);
+        activeObjects.Add(spawned);
+        chosen.activeInstances.Add(spawned);
+
+        // Zähler nachführen
+        if (!spawnedGroupCounts.ContainsKey(chosen.group))
+            spawnedGroupCounts[chosen.group] = 0;
+
+        spawnedGroupCounts[chosen.group]++;
+        occupiedSlots += chosen.sizeInSlots;
     }
 
     int[] GetAllowedIndices(SpawnableObject obj)
@@ -256,14 +253,6 @@ public class spawner : MonoBehaviour
         }
     }
 
-    int FindFreeSlotRange(bool[] occupied, int slotsNeeded, int[] allowedIndices = null)
-    {
-        List<int> validStarts = GetValidStartIndices(occupied, slotsNeeded, allowedIndices);
-        if (validStarts.Count == 0) return -1;
-
-        return validStarts[Random.Range(0, validStarts.Count)];
-    }
-
     List<int> GetValidStartIndices(bool[] occupied, int slotsNeeded, int[] allowedIndices = null)
     {
         List<int> validStarts = new List<int>();
@@ -284,32 +273,30 @@ public class spawner : MonoBehaviour
         return validStarts;
     }
 
-    /// <summary>
-    /// Wählt ein Objekt per Gewichtung, aber NUR aus Objekten, die aktuell
-    /// tatsächlich einen freien Slot-Bereich haben (Größe, feste Spawnpunkte
-    /// und bereits belegte Slots werden vorab geprüft). Gibt direkt den
-    /// gewählten Startindex für dieses Objekt mit zurück, damit "Objekt wählen"
-    /// und "Slot dafür wählen" nicht mehr auseinanderfallen können.
-    /// </summary>
+    SpawnableObject GetRandomObjectFromGroup(ObjectGroup group, Dictionary<ObjectGroup, int> spawnedGroupCounts, bool[] occupied, out int startIndex)
+    {
+        startIndex = -1;
+        var groupObjects = spawnableObjects.Where(o => o.group == group).ToList();
+        return SelectObjectFromCandidateList(groupObjects, spawnedGroupCounts, occupied, out startIndex);
+    }
+
     SpawnableObject GetRandomWeightedObject(Dictionary<ObjectGroup, int> spawnedGroupCounts, bool[] occupied, out int startIndex)
     {
         startIndex = -1;
+        return SelectObjectFromCandidateList(spawnableObjects, spawnedGroupCounts, occupied, out startIndex);
+    }
 
-        // Für jedes Objekt direkt mit ermitteln, welche Startindizes für es frei wären.
+    SpawnableObject SelectObjectFromCandidateList(List<SpawnableObject> candidates, Dictionary<ObjectGroup, int> spawnedGroupCounts, bool[] occupied, out int startIndex)
+    {
+        startIndex = -1;
         List<(SpawnableObject obj, List<int> validStarts)> available = new List<(SpawnableObject, List<int>)>();
 
-        foreach (var obj in spawnableObjects)
+        foreach (var obj in candidates)
         {
-            // spawnChance <= 0 heißt: dieses Objekt ist komplett deaktiviert
-            // (z.B. zum gezielten Testen eines einzelnen Objekts). Muss vor
-            // allen anderen Checks raus, sonst kann es über minPerWave/priorityList
-            // trotzdem noch gewählt werden.
             if (obj.spawnChance <= 0f) continue;
-
-            // Max Active Check in der Szene
             if (obj.activeInstances.Count >= obj.maxActiveCount) continue;
 
-            // Gruppen-Regel Check pro Wave
+            // Gruppen-Regel Max-Per-Wave prüfen
             GroupWaveRule rule = groupRules.Find(r => r.group == obj.group);
             if (rule != null)
             {
@@ -317,7 +304,6 @@ public class spawner : MonoBehaviour
                 if (currentInWave >= rule.maxPerWave) continue;
             }
 
-            // NEU: Objekt nur berücksichtigen, wenn es aktuell auch wirklich irgendwo passt.
             int[] allowedIndices = obj.useSpecificSpawnPoints ? GetAllowedIndices(obj) : null;
             List<int> validStarts = GetValidStartIndices(occupied, obj.sizeInSlots, allowedIndices);
             if (validStarts.Count == 0) continue;
@@ -327,32 +313,17 @@ public class spawner : MonoBehaviour
 
         if (available.Count == 0) return null;
 
-        // Priorisierung bei minPerWave (nur unter den tatsächlich platzierbaren Objekten)
-        List<(SpawnableObject obj, List<int> validStarts)> priorityList = available.FindAll(entry =>
-        {
-            GroupWaveRule rule = groupRules.Find(r => r.group == entry.obj.group);
-            if (rule != null && rule.minPerWave > 0)
-            {
-                int currentInWave = spawnedGroupCounts.ContainsKey(entry.obj.group) ? spawnedGroupCounts[entry.obj.group] : 0;
-                return currentInWave < rule.minPerWave;
-            }
-            return false;
-        });
-
-        List<(SpawnableObject obj, List<int> validStarts)> selectionPool = priorityList.Count > 0 ? priorityList : available;
-
         float totalWeight = 0f;
-        foreach (var entry in selectionPool) totalWeight += entry.obj.spawnChance;
+        foreach (var entry in available) totalWeight += entry.obj.spawnChance;
 
         float randomValue = Random.Range(0f, totalWeight);
         float cumulative = 0f;
 
-        foreach (var entry in selectionPool)
+        foreach (var entry in available)
         {
             cumulative += entry.obj.spawnChance;
             if (randomValue <= cumulative)
             {
-                // 2. Slot für dieses Objekt wählen, aus seinen bereits ermittelten freien Startindizes
                 startIndex = entry.validStarts[Random.Range(0, entry.validStarts.Count)];
                 return entry.obj;
             }

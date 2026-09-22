@@ -1,4 +1,5 @@
 using UnityEngine;
+
 public class BlackHole : MonoBehaviour
 {
     [Header("Pull")]
@@ -11,7 +12,6 @@ public class BlackHole : MonoBehaviour
 
     void FixedUpdate()
     {
-
         Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, pullRadius);
         Debug.Log("Hits in range: " + hits.Length);
 
@@ -42,7 +42,11 @@ public class BlackHole : MonoBehaviour
 
         if (player.IsInvincible && !killsInvincible) return;
 
-        //player.Die();
+        PlayerMovement playerMovement = other.GetComponentInParent<PlayerMovement>();
+        if (playerMovement != null)
+        {
+            playerMovement.Die();
+        }
     }
 
     // Shows the pull radius in the Scene view when the object is selected

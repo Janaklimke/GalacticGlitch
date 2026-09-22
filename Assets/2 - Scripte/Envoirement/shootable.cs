@@ -42,9 +42,9 @@ public class shootable : MonoBehaviour
         Destroy(gameObject);
     }
 
-    void OnCollisionEnter2D(Collision2D collision)
+    void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.gameObject.CompareTag("Bullet"))
+        if (collision.CompareTag("Bullet"))
         {
             TakeHit();
             Destroy(collision.gameObject);

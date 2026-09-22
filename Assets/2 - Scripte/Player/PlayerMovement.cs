@@ -52,16 +52,24 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
+    public void Die()
+    {
+        if (GameManager.Instance.CurrentState == GameManager.GameState.GameOver)
+            return;
+
+        if (animator != null) animator.SetBool("death", true);
+
+        rb.gravityScale = startingGravityScale;
+        rb.linearVelocity = Vector2.zero;
+
+        GameManager.Instance.GameOver();
+    }
+
     void OnCollisionEnter2D(Collision2D collision)
     {
         if (collision.gameObject.CompareTag("Asteroid") || collision.gameObject.CompareTag("Ground"))
         {
-            if (animator != null) animator.SetBool("death", true);
-
-            rb.gravityScale = startingGravityScale;
-            rb.linearVelocity = Vector2.zero;
-
-            GameManager.Instance.GameOver();
+            Die();
         }
     }
 }
