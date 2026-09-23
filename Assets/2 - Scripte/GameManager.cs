@@ -48,8 +48,8 @@ public class GameManager : MonoBehaviour
 
     public void SubmitScore(string name, int finalScore)
     {
-        highScores.AddScore(name, finalScore);
-        leaderboardUI.Refresh(finalScore);
+        ScoreSaver.ScoreEntry entry = highScores.AddScore(name, finalScore);
+        leaderboardUI.Refresh(entry, finalScore);
     }
 
     void ShowStartScreen()

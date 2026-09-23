@@ -12,11 +12,13 @@ public class ScoreSaver : ScriptableObject
     {
         public string playerName;
         public int score;
+        public string date;
 
-        public ScoreEntry(string playerName, int score)
+        public ScoreEntry(string playerName, int score, string date)
         {
             this.playerName = playerName;
             this.score = score;
+            this.date = date;
         }
     }
 
@@ -35,21 +37,42 @@ public class ScoreSaver : ScriptableObject
     {
         Load();
     }
-    public void AddScore(string name, int score)
+    public ScoreEntry AddScore(string name, int score)
     {
         if (string.IsNullOrEmpty(name) || name.Length != 4)
         {
             Debug.LogError("Score not saved: name must be exactly 4 letters, got \"" + name + "\"");
-            return;
+            return null;
         }
 
-        topScores.Add(new ScoreEntry(name.ToUpper(), score));
+        name = name.ToUpper();
+        string now = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm");
+
+        ScoreEntry existing = topScores.Find(e => e.playerName == name);
+
+        if (existing != null)
+        {
+            if (score <= existing.score)
+            {
+                return null;
+            }
+
+            existing.score = score;
+            existing.date = now;
+            topScores.Sort((a, b) => b.score.CompareTo(a.score));
+            Save();
+            return existing;
+        }
+
+        ScoreEntry entry = new ScoreEntry(name, score, now);
+        topScores.Add(entry);
         topScores.Sort((a, b) => b.score.CompareTo(a.score));
 
         if (topScores.Count > MaxScores)
             topScores.RemoveRange(MaxScores, topScores.Count - MaxScores);
 
         Save();
+        return topScores.Contains(entry) ? entry : null; // null if not top 10
     }
 
     public List<ScoreEntry> GetTopScores()
@@ -62,7 +85,7 @@ public class ScoreSaver : ScriptableObject
         return topScores.Count > 0 ? topScores[0].score : 0;
     }
 
-    // Wipe / for clearing out debug runs before release
+    // Wipe for clearing out debug runs before release
     public void ResetScores()
     {
         topScores.Clear();

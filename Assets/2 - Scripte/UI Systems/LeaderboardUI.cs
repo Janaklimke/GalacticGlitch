@@ -7,18 +7,25 @@ public class LeaderboardUI : MonoBehaviour
     public ScoreSaver highScores;
     public TMP_Text leaderboardText;
     public TMP_Text finalScoreText; 
+    public string highlightColor = "#FFD700"; // yellow
 
-    public void Refresh(int finalScore)
+    public void Refresh(ScoreSaver.ScoreEntry highlightEntry, int finalScore)
     {
         if (finalScoreText != null)
-            finalScoreText.text = "This run: " + finalScore;
+            finalScoreText.text = "YOUR SCORE : " + finalScore;
 
         var scores = highScores.GetTopScores();
 
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < scores.Count; i++)
         {
-            sb.AppendLine((i + 1) + ". " + scores[i].playerName + " - " + scores[i].score);
+            string line = (i + 1) + ". " + scores[i].playerName + " - " + scores[i].score;
+
+            bool isThisRun = highlightEntry != null && ReferenceEquals(scores[i], highlightEntry);
+            if (isThisRun)
+                line = "<color=" + highlightColor + "><b>" + line + "</b></color>";
+
+            sb.AppendLine(line);
         }
 
         if (scores.Count == 0)

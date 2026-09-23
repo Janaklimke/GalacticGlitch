@@ -5,8 +5,10 @@ TagManager:
   serializedVersion: 3
   tags:
   - Glitch
-  - Hazard
   - Bullet
+  - Asteroid
+  - DestroyZone
+  - Ground
   layers:
   - Default
   - TransparentFX

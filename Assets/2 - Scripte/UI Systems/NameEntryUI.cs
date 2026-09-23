@@ -20,7 +20,7 @@ public class NameEntryUI : MonoBehaviour
     public void Show(int finalScore)
     {
         pendingScore = finalScore;
-        nameInput.text = "";
+        nameInput.text = "XXXX";
 
         gameObject.SetActive(true);
         nameInput.Select();
