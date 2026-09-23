@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.SocialPlatforms.Impl;
 
 public class GameManager : MonoBehaviour
 {
@@ -10,6 +11,9 @@ public class GameManager : MonoBehaviour
     [Header("UI Canvases")]
     public GameObject startScreenCanvas;
     public GameObject gameOverCanvas;
+    public ScoreSaver highScores;
+    public NameEntryUI nameEntryUI;
+    public LeaderboardUI leaderboardUI;
 
     void Awake()
     {
@@ -37,6 +41,15 @@ public class GameManager : MonoBehaviour
     {
         CurrentState = GameState.GameOver;
         gameOverCanvas.SetActive(true);
+
+        int finalScore = PointManager.Instance.Points;
+        nameEntryUI.Show(finalScore); 
+    }
+
+    public void SubmitScore(string name, int finalScore)
+    {
+        highScores.AddScore(name, finalScore);
+        leaderboardUI.Refresh(finalScore);
     }
 
     void ShowStartScreen()

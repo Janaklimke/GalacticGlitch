@@ -4,9 +4,16 @@ using UnityEngine;
 
 public class PointManager : MonoBehaviour
 {
+    public static PointManager Instance { get; private set; }
+
     public TMP_Text texts;
 
-    private int points = 0;
+    public int Points { get; private set; } = 0;
+
+    void Awake()
+    {
+        Instance = this;
+    }
 
     void Start()
     {
@@ -19,8 +26,17 @@ public class PointManager : MonoBehaviour
         {
             yield return new WaitForSeconds(1f);
 
-            points++;
-            texts.text = "Points: " + points;
+            if (GameManager.Instance.CurrentState == GameManager.GameState.Playing)
+            {
+                Points++;
+                texts.text = "Points: " + Points;
+            }
         }
+    }
+
+    public void ResetPoints()
+    {
+        Points = 0;
+        texts.text = "Points: 0";
     }
 }

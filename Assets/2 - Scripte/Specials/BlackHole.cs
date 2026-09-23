@@ -3,8 +3,8 @@ using UnityEngine;
 public class BlackHole : MonoBehaviour
 {
     [Header("Pull")]
-    public float pullRadius = 2f;
-    public float pullStrength = 30f;   // force at the centre, fades to 0 at the edge of the radius
+    public float pullRadius = 5f;
+    public float pullStrength = 150f;   // force at the centre, fades to 0 at the edge of the radius
     public bool verticalOnly = true;   // player has a fixed x, so pull up/down only
 
     [Header("Kill")]

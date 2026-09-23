@@ -388,10 +388,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9a58cacaf0d2e2c488e719fc2d6c16be, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  pullRadius: 3
-  pullStrength: 30
+  pullRadius: 6
+  pullStrength: 60
   verticalOnly: 1
-  killsInvincible: 0
+  killsInvincible: 1
 --- !u!58 &749326476
 CircleCollider2D:
   m_ObjectHideFlags: 0
