@@ -46,12 +46,21 @@ public class spawner : MonoBehaviour
         [Tooltip("Maximalanzahl dieser Gruppe pro Spawn-Line/Wave")]
         public int maxPerWave = 1;
 
+        [Tooltip("Gewicht dieser GRUPPE beim Auffüllen (Schritt 2). Höher = die Gruppe wird insgesamt öfter gewählt, unabhängig davon wie viele Prefabs sie enthält.")]
+        public float groupWeight = 1f;
+
         [Header("Prefabs in dieser Gruppe")]
         public List<SpawnableObject> spawnableObjects = new List<SpawnableObject>();
     }
 
     [Header("Gruppen-Konfigurationen")]
     public List<ObjectGroupConfig> groupConfigs = new List<ObjectGroupConfig>();
+
+    [Header("Objekt-Anzahl pro Wave")]
+    [Tooltip("Minimale Anzahl an Objekten (NICHT Slots!) pro Wave")]
+    public int minObjectsPerWave = 1;
+    [Tooltip("Maximale Anzahl an Objekten (NICHT Slots!) pro Wave")]
+    public int maxObjectsPerWave = 3;
 
     [Header("Spawn Line Limits")]
     [Tooltip("Maximale Gesamtzahl an belegten Slots pro Spawn Line (z.B. max 2 von 4 Slots belegen)")]
@@ -63,10 +72,6 @@ public class spawner : MonoBehaviour
     [Header("Timing")]
     public float minSpawnInterval = 1.5f;
     public float maxSpawnInterval = 3f;
-
-    [Header("Multi-Spawn Settings")]
-    [Range(0f, 1f)]
-    public float multiSpawnChance = 0.2f;
 
     [Header("Object Speed Settings")]
     public float startSpeed = 3f;
@@ -157,38 +162,44 @@ public class spawner : MonoBehaviour
 
         bool[] occupied = new bool[spawnPoints.Length];
         Dictionary<ObjectGroupType, int> spawnedGroupCounts = new Dictionary<ObjectGroupType, int>();
-        
-        int occupiedSlotsInWave = 0;
 
-        // 1. ZUERST MINDEST-ANFORDERUNGEN DER GRUPPEN SPANWEN (minPerWave)
+        int occupiedSlotsInWave = 0;
+        int spawnedObjectsInWave = 0;
+
+        // Am Anfang der Wave festlegen, wie viele OBJEKTE (nicht Slots!) diese Wave haben soll
+        int targetObjectCount = Random.Range(minObjectsPerWave, maxObjectsPerWave + 1);
+
+        // 1. ZUERST MINDEST-ANFORDERUNGEN DER GRUPPEN SPAWNEN (minPerWave)
         foreach (var groupConfig in groupConfigs)
         {
             if (groupConfig.minPerWave <= 0) continue;
 
             for (int i = 0; i < groupConfig.minPerWave; i++)
             {
+                if (spawnedObjectsInWave >= targetObjectCount) break;
                 if (occupiedSlotsInWave >= maxOccupiedSlotsPerWave) break;
 
                 SpawnableObject chosen = GetRandomObjectFromGroup(groupConfig, spawnedGroupCounts, occupied, out int startIndex);
                 if (chosen != null && startIndex != -1)
                 {
                     ExecuteSpawn(chosen, groupConfig.groupType, startIndex, occupied, spawnedGroupCounts, ref occupiedSlotsInWave);
+                    spawnedObjectsInWave++;
                 }
             }
         }
 
-        // 2. OPTIONALE WEITERE OBJEKTE PER CHANCE HINZUFÜGEN
+        // 2. WEITERE OBJEKTE AUFFÜLLEN, BIS DIE ZIEL-ANZAHL ERREICHT IST
         int maxAttempts = spawnPoints.Length;
         for (int attempt = 0; attempt < maxAttempts; attempt++)
         {
-            if (attempt > 0 && Random.value > multiSpawnChance) break;
-
+            if (spawnedObjectsInWave >= targetObjectCount) break;
             if (occupiedSlotsInWave >= maxOccupiedSlotsPerWave) break;
 
             SpawnableObject chosen = GetRandomWeightedObject(spawnedGroupCounts, occupied, out int startIndex);
             if (chosen == null || startIndex == -1) break;
 
             ExecuteSpawn(chosen, chosen.parentGroupType, startIndex, occupied, spawnedGroupCounts, ref occupiedSlotsInWave);
+            spawnedObjectsInWave++;
         }
     }
 
@@ -263,21 +274,83 @@ public class spawner : MonoBehaviour
         return SelectObjectFromCandidateList(groupConfig.spawnableObjects, groupConfig, spawnedGroupCounts, occupied, out startIndex);
     }
 
+    // ---------- NEU: Zweistufige Auswahl (erst Gruppe, dann Objekt) ----------
+
     SpawnableObject GetRandomWeightedObject(Dictionary<ObjectGroupType, int> spawnedGroupCounts, bool[] occupied, out int startIndex)
     {
         startIndex = -1;
-        List<SpawnableObject> allCandidates = new List<SpawnableObject>();
+
+        // 1. Alle Gruppen sammeln, die noch spawnen dürfen (maxPerWave nicht erreicht)
+        //    und mind. ein gültiges (platzierbares) Objekt haben.
+        List<(ObjectGroupConfig group, List<(SpawnableObject obj, List<int> validStarts)> validObjs)> eligibleGroups
+            = new List<(ObjectGroupConfig, List<(SpawnableObject, List<int>)>)>();
 
         foreach (var groupConfig in groupConfigs)
         {
+            if (groupConfig.groupWeight <= 0f) continue;
+
+            int currentInWave = spawnedGroupCounts.ContainsKey(groupConfig.groupType) ? spawnedGroupCounts[groupConfig.groupType] : 0;
+            if (currentInWave >= groupConfig.maxPerWave) continue;
+
+            List<(SpawnableObject obj, List<int> validStarts)> validObjs = new List<(SpawnableObject, List<int>)>();
+
             foreach (var obj in groupConfig.spawnableObjects)
             {
+                if (obj.spawnChance <= 0f) continue;
                 obj.parentGroupType = groupConfig.groupType;
-                allCandidates.Add(obj);
+
+                int[] allowedIndices = obj.useSpecificSpawnPoints ? GetAllowedIndices(obj) : null;
+                List<int> validStarts = GetValidStartIndices(occupied, obj.sizeInSlots, allowedIndices);
+                if (validStarts.Count == 0) continue;
+
+                validObjs.Add((obj, validStarts));
+            }
+
+            if (validObjs.Count > 0)
+                eligibleGroups.Add((groupConfig, validObjs));
+        }
+
+        if (eligibleGroups.Count == 0) return null;
+
+        // 2. Gruppe gewichtet nach groupWeight auswählen
+        float totalGroupWeight = 0f;
+        foreach (var entry in eligibleGroups) totalGroupWeight += entry.group.groupWeight;
+
+        float groupRandom = Random.Range(0f, totalGroupWeight);
+        float groupCumulative = 0f;
+
+        List<(SpawnableObject obj, List<int> validStarts)> chosenGroupObjects = null;
+
+        foreach (var entry in eligibleGroups)
+        {
+            groupCumulative += entry.group.groupWeight;
+            if (groupRandom <= groupCumulative)
+            {
+                chosenGroupObjects = entry.validObjs;
+                break;
             }
         }
 
-        return SelectObjectFromCandidateList(allCandidates, null, spawnedGroupCounts, occupied, out startIndex);
+        if (chosenGroupObjects == null) return null;
+
+        // 3. Innerhalb der gewählten Gruppe: Objekt gewichtet nach spawnChance auswählen
+        float totalObjWeight = 0f;
+        foreach (var c in chosenGroupObjects) totalObjWeight += c.obj.spawnChance;
+
+        float objRandom = Random.Range(0f, totalObjWeight);
+        float objCumulative = 0f;
+
+        foreach (var c in chosenGroupObjects)
+        {
+            objCumulative += c.obj.spawnChance;
+            if (objRandom <= objCumulative)
+            {
+                startIndex = c.validStarts[Random.Range(0, c.validStarts.Count)];
+                return c.obj;
+            }
+        }
+
+        return null;
     }
 
     SpawnableObject SelectObjectFromCandidateList(List<SpawnableObject> candidates, ObjectGroupConfig singleGroupConfig, Dictionary<ObjectGroupType, int> spawnedGroupCounts, bool[] occupied, out int startIndex)
