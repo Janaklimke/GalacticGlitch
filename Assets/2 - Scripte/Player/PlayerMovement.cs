@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
@@ -7,11 +8,15 @@ public class PlayerMovement : MonoBehaviour
     public float gravityScale = 2.5f;
     public float startingGravityScale = 0f;
 
+    [Header("Start Delay")]
+    public float startDelay = 2f;
+
     [Header("Animation")]
     public Animator animator;
 
     private Rigidbody2D rb;
     private Glitchdash glitchdash;
+    private bool isStarting = false;
 
     void Start()
     {
@@ -27,18 +32,35 @@ public class PlayerMovement : MonoBehaviour
     void Update()
     {
         if (GameManager.Instance.CurrentState == GameManager.GameState.GameOver)
-            return; // nach Game Over keine Eingaben mehr
+            return;
+
+        if (isStarting)
+            return;
 
         if (Input.GetKeyDown(KeyCode.Space))
         {
             if (GameManager.Instance.CurrentState == GameManager.GameState.Menu)
             {
+                isStarting = true;
+
                 GameManager.Instance.StartGame();
-                rb.gravityScale = gravityScale;
+
+                StartCoroutine(StartMovementAfterDelay());
+                return;
             }
 
             Jump();
         }
+    }
+
+    IEnumerator StartMovementAfterDelay()
+    {
+        yield return new WaitForSeconds(startDelay);
+
+        rb.gravityScale = gravityScale;
+        Jump();
+
+        isStarting = false;
     }
 
     void Jump()

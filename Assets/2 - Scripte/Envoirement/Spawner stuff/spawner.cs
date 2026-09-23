@@ -4,7 +4,7 @@ using System.Linq;
 
 public class spawner : MonoBehaviour
 {
-    public enum ObjectGroup
+    public enum ObjectGroupType
     {
         Default,
         BigAsteroid,
@@ -19,17 +19,11 @@ public class spawner : MonoBehaviour
         public string name = "Spawn Object";
         public GameObject prefab;
 
-        [Header("Gruppe & Spawn-Chance")]
-        public ObjectGroup group = ObjectGroup.Default;
-        
-        [Tooltip("Höher = wahrscheinlicher relativ zu anderen Objekten.")]
+        [Tooltip("Höher = wahrscheinlichere Auswahl innerhalb dieser Gruppe.")]
         public float spawnChance = 1f;
 
         [Tooltip("Wie viele Spawnpunkte dieses Objekt blockiert (1 = normal, 2 = groß, etc.)")]
         public int sizeInSlots = 1;
-
-        [Tooltip("Maximal gleichzeitig aktive Instanzen dieses Prefabs in der Szene insgesamt")]
-        public int maxActiveCount = 4;
 
         [Header("Spezifische Spawnpunkte")]
         public bool useSpecificSpawnPoints = false;
@@ -37,24 +31,27 @@ public class spawner : MonoBehaviour
         public Transform[] allowedSpawnPoints;
 
         [System.NonSerialized]
-        public List<GameObject> activeInstances = new List<GameObject>();
+        public ObjectGroupType parentGroupType;
     }
 
     [System.Serializable]
-    public class GroupWaveRule
+    public class ObjectGroupConfig
     {
-        public ObjectGroup group;
+        public string groupName = "New Group";
+        public ObjectGroupType groupType = ObjectGroupType.Default;
+
+        [Header("Gruppen-Regeln pro Wave")]
         [Tooltip("Mindestanzahl dieser Gruppe pro Spawn-Line/Wave")]
         public int minPerWave = 0;
         [Tooltip("Maximalanzahl dieser Gruppe pro Spawn-Line/Wave")]
         public int maxPerWave = 1;
+
+        [Header("Prefabs in dieser Gruppe")]
+        public List<SpawnableObject> spawnableObjects = new List<SpawnableObject>();
     }
 
-    [Header("Spawnable Prefabs")]
-    public List<SpawnableObject> spawnableObjects = new List<SpawnableObject>();
-
-    [Header("Gruppen-Regeln pro Spawn-Line")]
-    public List<GroupWaveRule> groupRules = new List<GroupWaveRule>();
+    [Header("Gruppen-Konfigurationen")]
+    public List<ObjectGroupConfig> groupConfigs = new List<ObjectGroupConfig>();
 
     [Header("Spawn Line Limits")]
     [Tooltip("Maximale Gesamtzahl an belegten Slots pro Spawn Line (z.B. max 2 von 4 Slots belegen)")]
@@ -156,38 +153,34 @@ public class spawner : MonoBehaviour
 
     void SpawnWave()
     {
-        if (spawnPoints.Length == 0 || spawnableObjects.Count == 0) return;
-
-        CleanupActiveInstances();
+        if (spawnPoints.Length == 0 || groupConfigs.Count == 0) return;
 
         bool[] occupied = new bool[spawnPoints.Length];
-        Dictionary<ObjectGroup, int> spawnedGroupCounts = new Dictionary<ObjectGroup, int>();
+        Dictionary<ObjectGroupType, int> spawnedGroupCounts = new Dictionary<ObjectGroupType, int>();
         
         int occupiedSlotsInWave = 0;
 
         // 1. ZUERST MINDEST-ANFORDERUNGEN DER GRUPPEN SPANWEN (minPerWave)
-        foreach (var rule in groupRules)
+        foreach (var groupConfig in groupConfigs)
         {
-            if (rule.minPerWave <= 0) continue;
+            if (groupConfig.minPerWave <= 0) continue;
 
-            for (int i = 0; i < rule.minPerWave; i++)
+            for (int i = 0; i < groupConfig.minPerWave; i++)
             {
                 if (occupiedSlotsInWave >= maxOccupiedSlotsPerWave) break;
 
-                SpawnableObject chosen = GetRandomObjectFromGroup(rule.group, spawnedGroupCounts, occupied, out int startIndex);
+                SpawnableObject chosen = GetRandomObjectFromGroup(groupConfig, spawnedGroupCounts, occupied, out int startIndex);
                 if (chosen != null && startIndex != -1)
                 {
-                    ExecuteSpawn(chosen, startIndex, occupied, spawnedGroupCounts, ref occupiedSlotsInWave);
+                    ExecuteSpawn(chosen, groupConfig.groupType, startIndex, occupied, spawnedGroupCounts, ref occupiedSlotsInWave);
                 }
             }
         }
 
         // 2. OPTIONALE WEITERE OBJEKTE PER CHANCE HINZUFÜGEN
-        // Entscheidet per multiSpawnChance, ob überhaupt mehr als das Minimum gespawnt werden soll
         int maxAttempts = spawnPoints.Length;
         for (int attempt = 0; attempt < maxAttempts; attempt++)
         {
-            // Ab dem 1. optionalen Objekt bestimmt die multiSpawnChance das Abbrechen
             if (attempt > 0 && Random.value > multiSpawnChance) break;
 
             if (occupiedSlotsInWave >= maxOccupiedSlotsPerWave) break;
@@ -195,11 +188,11 @@ public class spawner : MonoBehaviour
             SpawnableObject chosen = GetRandomWeightedObject(spawnedGroupCounts, occupied, out int startIndex);
             if (chosen == null || startIndex == -1) break;
 
-            ExecuteSpawn(chosen, startIndex, occupied, spawnedGroupCounts, ref occupiedSlotsInWave);
+            ExecuteSpawn(chosen, chosen.parentGroupType, startIndex, occupied, spawnedGroupCounts, ref occupiedSlotsInWave);
         }
     }
 
-    void ExecuteSpawn(SpawnableObject chosen, int startIndex, bool[] occupied, Dictionary<ObjectGroup, int> spawnedGroupCounts, ref int occupiedSlots)
+    void ExecuteSpawn(SpawnableObject chosen, ObjectGroupType groupType, int startIndex, bool[] occupied, Dictionary<ObjectGroupType, int> spawnedGroupCounts, ref int occupiedSlots)
     {
         // Slots im Array als belegt markieren
         for (int i = startIndex; i < startIndex + chosen.sizeInSlots; i++)
@@ -220,13 +213,12 @@ public class spawner : MonoBehaviour
         // Instanziieren
         GameObject spawned = Instantiate(chosen.prefab, spawnPos, Quaternion.identity);
         activeObjects.Add(spawned);
-        chosen.activeInstances.Add(spawned);
 
         // Zähler nachführen
-        if (!spawnedGroupCounts.ContainsKey(chosen.group))
-            spawnedGroupCounts[chosen.group] = 0;
+        if (!spawnedGroupCounts.ContainsKey(groupType))
+            spawnedGroupCounts[groupType] = 0;
 
-        spawnedGroupCounts[chosen.group]++;
+        spawnedGroupCounts[groupType]++;
         occupiedSlots += chosen.sizeInSlots;
     }
 
@@ -243,14 +235,6 @@ public class spawner : MonoBehaviour
             if (idx != -1) indices.Add(idx);
         }
         return indices.ToArray();
-    }
-
-    void CleanupActiveInstances()
-    {
-        foreach (var obj in spawnableObjects)
-        {
-            obj.activeInstances.RemoveAll(instance => instance == null);
-        }
     }
 
     List<int> GetValidStartIndices(bool[] occupied, int slotsNeeded, int[] allowedIndices = null)
@@ -273,20 +257,30 @@ public class spawner : MonoBehaviour
         return validStarts;
     }
 
-    SpawnableObject GetRandomObjectFromGroup(ObjectGroup group, Dictionary<ObjectGroup, int> spawnedGroupCounts, bool[] occupied, out int startIndex)
+    SpawnableObject GetRandomObjectFromGroup(ObjectGroupConfig groupConfig, Dictionary<ObjectGroupType, int> spawnedGroupCounts, bool[] occupied, out int startIndex)
     {
         startIndex = -1;
-        var groupObjects = spawnableObjects.Where(o => o.group == group).ToList();
-        return SelectObjectFromCandidateList(groupObjects, spawnedGroupCounts, occupied, out startIndex);
+        return SelectObjectFromCandidateList(groupConfig.spawnableObjects, groupConfig, spawnedGroupCounts, occupied, out startIndex);
     }
 
-    SpawnableObject GetRandomWeightedObject(Dictionary<ObjectGroup, int> spawnedGroupCounts, bool[] occupied, out int startIndex)
+    SpawnableObject GetRandomWeightedObject(Dictionary<ObjectGroupType, int> spawnedGroupCounts, bool[] occupied, out int startIndex)
     {
         startIndex = -1;
-        return SelectObjectFromCandidateList(spawnableObjects, spawnedGroupCounts, occupied, out startIndex);
+        List<SpawnableObject> allCandidates = new List<SpawnableObject>();
+
+        foreach (var groupConfig in groupConfigs)
+        {
+            foreach (var obj in groupConfig.spawnableObjects)
+            {
+                obj.parentGroupType = groupConfig.groupType;
+                allCandidates.Add(obj);
+            }
+        }
+
+        return SelectObjectFromCandidateList(allCandidates, null, spawnedGroupCounts, occupied, out startIndex);
     }
 
-    SpawnableObject SelectObjectFromCandidateList(List<SpawnableObject> candidates, Dictionary<ObjectGroup, int> spawnedGroupCounts, bool[] occupied, out int startIndex)
+    SpawnableObject SelectObjectFromCandidateList(List<SpawnableObject> candidates, ObjectGroupConfig singleGroupConfig, Dictionary<ObjectGroupType, int> spawnedGroupCounts, bool[] occupied, out int startIndex)
     {
         startIndex = -1;
         List<(SpawnableObject obj, List<int> validStarts)> available = new List<(SpawnableObject, List<int>)>();
@@ -294,14 +288,14 @@ public class spawner : MonoBehaviour
         foreach (var obj in candidates)
         {
             if (obj.spawnChance <= 0f) continue;
-            if (obj.activeInstances.Count >= obj.maxActiveCount) continue;
 
             // Gruppen-Regel Max-Per-Wave prüfen
-            GroupWaveRule rule = groupRules.Find(r => r.group == obj.group);
-            if (rule != null)
+            ObjectGroupConfig groupConfig = singleGroupConfig ?? groupConfigs.Find(g => g.spawnableObjects.Contains(obj));
+            if (groupConfig != null)
             {
-                int currentInWave = spawnedGroupCounts.ContainsKey(obj.group) ? spawnedGroupCounts[obj.group] : 0;
-                if (currentInWave >= rule.maxPerWave) continue;
+                obj.parentGroupType = groupConfig.groupType;
+                int currentInWave = spawnedGroupCounts.ContainsKey(groupConfig.groupType) ? spawnedGroupCounts[groupConfig.groupType] : 0;
+                if (currentInWave >= groupConfig.maxPerWave) continue;
             }
 
             int[] allowedIndices = obj.useSpecificSpawnPoints ? GetAllowedIndices(obj) : null;
