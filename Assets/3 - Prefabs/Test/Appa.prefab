@@ -46,6 +46,7 @@ GameObject:
   - component: {fileID: 956828799491398096}
   - component: {fileID: 683396481624854188}
   - component: {fileID: -7286533192885182028}
+  - component: {fileID: 5515105111455808631}
   m_Layer: 0
   m_Name: Appa
   m_TagString: Untagged
@@ -82,8 +83,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   jumpForce: 7
-  gravityScale: 1.5
+  gravityScale: 2.5
   startingGravityScale: 0
+  startDelay: 2
+  animator: {fileID: 0}
 --- !u!114 &2389281671389429833
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -101,6 +104,7 @@ MonoBehaviour:
   projectileSpeed: 10
   projectileGravityScale: 0
   shootKey: 323
+  animator: {fileID: 0}
 --- !u!212 &3016332759795063813
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -251,3 +255,23 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &5515105111455808631
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3341151365745328368}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 06bde71ba77980141ac420dbcb252307, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  glitchTag: Glitch
+  baseSpeed: 4
+  dashSpeedMultiplier: 2.5
+  speedSmoothing: 8
+  dashDuration: 1.2
+  invincibleExtraTime: 0.3
+  playerCollider: {fileID: 683396481624854188}
+  animator: {fileID: 0}

@@ -10,7 +10,6 @@ GameObject:
   m_Component:
   - component: {fileID: 5550793902029161881}
   - component: {fileID: 3327726257459071569}
-  - component: {fileID: 7142079018085819505}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -48,19 +47,5 @@ MonoBehaviour:
   startScreenCanvas: {fileID: 0}
   gameOverCanvas: {fileID: 0}
   highScores: {fileID: 11400000, guid: ef997a2314e7813469b8a7f9d9904c33, type: 2}
-  nameEntryUI: {fileID: 7142079018085819505}
+  nameEntryUI: {fileID: 0}
   leaderboardUI: {fileID: 0}
---- !u!114 &7142079018085819505
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6805496000920193379}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2099da253aaf4e84780d87cb4da48b63, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  nameInput: {fileID: 0}
-  confirmButton: {fileID: 0}
