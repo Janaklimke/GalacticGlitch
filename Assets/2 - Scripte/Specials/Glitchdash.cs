@@ -40,10 +40,8 @@ public class Glitchdash : MonoBehaviour
         BaseWorldSpeed = baseSpeed;
         sr = GetComponentInChildren<SpriteRenderer>();
 
-        // NEU: Falls im Inspector nicht gesetzt, eigenen Collider verwenden
         if (playerCollider == null) playerCollider = GetComponent<Collider2D>();
 
-        // NEU: Falls im Inspector nicht gesetzt, eigenen Animator verwenden
         if (animator == null) animator = GetComponent<Animator>();
     }
 
@@ -54,24 +52,17 @@ public class Glitchdash : MonoBehaviour
         dashTimer -= Time.deltaTime;
         invincibleTimer -= Time.deltaTime;
 
-        // Normale Speed kommt vom Spawner (wächst mit der Zeit), Fallback auf baseSpeed falls kein Spawner existiert
         float normalSpeed = spawner.SpawnerActive ? spawner.CurrentDifficultySpeed : baseSpeed;
-        BaseWorldSpeed = normalSpeed; // hält die Referenz für den Spawner-Multiplikator konsistent
+        BaseWorldSpeed = normalSpeed;
 
-        // Ease toward the target speed so the dash feels like a burst, not a snap
-        // Dash-Ziel ist proportional zur aktuellen normalen Speed statt fix
         float target = IsDashing ? normalSpeed * dashSpeedMultiplier : normalSpeed;
         WorldSpeed = Mathf.Lerp(WorldSpeed, target, speedSmoothing * Time.deltaTime);
 
-        // NEU: Während der Invincibility wird der Collider zum Trigger, dadurch gibt es
-        // keine OnCollisionEnter2D-Events mehr mit Asteroiden -> keine Kollision/Game Over.
-        // Danach wieder normaler (solider) Collider.
         if (playerCollider != null)
         {
             playerCollider.isTrigger = IsInvincible;
         }
 
-        // Flicker while invincible so the player can see it
         if (sr != null)
         {
             Color c = sr.color;
@@ -79,8 +70,6 @@ public class Glitchdash : MonoBehaviour
             sr.color = c;
         }
 
-        // NEU: "glitch"-Bool im Animator hält den State so lange aktiv wie IsInvincible true ist
-        // -> Animation dauert exakt so lange wie der komplette Dash (inkl. Invincible-Nachlaufzeit)
         if (animator != null) animator.SetBool("glitch", IsInvincible);
     }
 
@@ -96,11 +85,8 @@ public class Glitchdash : MonoBehaviour
 
     void CollectGlitch(GameObject glitch)
     {
-        // Refreshes the timers if you grab another one mid-dash
         dashTimer = dashDuration;
         invincibleTimer = dashDuration + invincibleExtraTime;
-
-        // Animator-Bool wird in Update() über IsInvincible gesteuert, hier kein SetTrigger mehr nötig
 
         Destroy(glitch);
     }

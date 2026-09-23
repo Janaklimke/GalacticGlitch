@@ -5,18 +5,33 @@ public class WormshootablleCollectible : MonoBehaviour
 {
     [Header("Health Settings")]
     public bool randomHitsToDestroy = false;
+
+    [Tooltip("Wird nur benutzt, wenn 'Random Hits To Destroy' AUS ist")]
     public int hitsToDestroy = 3;
+
+    [Tooltip("Wird nur benutzt, wenn 'Random Hits To Destroy' AN ist")]
     public int minRandomHits = 1;
     public int maxRandomHits = 5;
 
     private int currentHits;
 
     [Header("Collectable Settings")]
+    [Tooltip("Das Canvas (oder GameObject), das beim Einsammeln kurz aktiviert wird. Wird normalerweise vom Spawner per Init() gesetzt.")]
     public GameObject canvasToShow;
+
+    [Tooltip("Wie lange (in Sekunden) das Canvas sichtbar bleibt")]
     public float displayDuration = 3f;
+
+    [Tooltip("Tag des Spielers, der den Wurm einsammeln kann")]
     public string playerTag = "Player";
 
     private bool isCollected = false;
+
+    public void Init(GameObject canvas)
+    {
+        if (canvas != null)
+            canvasToShow = canvas;
+    }
 
     void Start()
     {
@@ -25,7 +40,9 @@ public class WormshootablleCollectible : MonoBehaviour
             : hitsToDestroy;
 
         if (canvasToShow != null)
+        {
             canvasToShow.SetActive(false);
+        }
     }
 
     public void TakeHit()
@@ -33,8 +50,16 @@ public class WormshootablleCollectible : MonoBehaviour
         if (isCollected) return;
 
         currentHits--;
+
         if (currentHits <= 0)
-            Destroy(gameObject);
+        {
+            DestroyObject();
+        }
+    }
+
+    void DestroyObject()
+    {
+        Destroy(gameObject);
     }
 
     void OnTriggerEnter2D(Collider2D collision)
@@ -67,7 +92,7 @@ public class WormshootablleCollectible : MonoBehaviour
         if (canvasToShow != null)
         {
             CoroutineRunner.Instance.StartCoroutine(
-                ShowCanvasThenHide(canvasToShow, displayDuration, gameObject)
+                ShowCanvasThenDestroy(canvasToShow, displayDuration, gameObject)
             );
         }
         else
@@ -76,7 +101,7 @@ public class WormshootablleCollectible : MonoBehaviour
         }
     }
 
-    static IEnumerator ShowCanvasThenHide(GameObject canvas, float duration, GameObject wormToDestroy)
+    static IEnumerator ShowCanvasThenDestroy(GameObject canvas, float duration, GameObject wormToDestroy)
     {
         canvas.SetActive(true);
         yield return new WaitForSeconds(duration);

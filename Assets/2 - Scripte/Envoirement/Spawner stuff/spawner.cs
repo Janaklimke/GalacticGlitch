@@ -78,6 +78,10 @@ public class spawner : MonoBehaviour
     public float maxSpeed = 8f;
     public float speedIncreasePerSecond = 0.05f;
 
+    [Header("Collectable Settings")]
+    [Tooltip("Wird an gespawnte Collectables (z.B. Worms) weitergegeben, da Prefabs selbst keine Szenen-Objekte referenzieren können.")]
+    public GameObject collectCanvas;
+
     private float currentSpeed;
     private float timer;
     private float nextSpawnTime;
@@ -225,6 +229,14 @@ public class spawner : MonoBehaviour
         GameObject spawned = Instantiate(chosen.prefab, spawnPos, Quaternion.identity);
         activeObjects.Add(spawned);
 
+        // Falls es ein Collectable-Worm ist, Canvas-Referenz aus der Szene mitgeben,
+        // da das Prefab selbst kein Szenen-Objekt referenzieren kann.
+        WormshootablleCollectible collectable = spawned.GetComponent<WormshootablleCollectible>();
+        if (collectable != null)
+        {
+            collectable.Init(collectCanvas);
+        }
+
         // Zähler nachführen
         if (!spawnedGroupCounts.ContainsKey(groupType))
             spawnedGroupCounts[groupType] = 0;
@@ -274,7 +286,7 @@ public class spawner : MonoBehaviour
         return SelectObjectFromCandidateList(groupConfig.spawnableObjects, groupConfig, spawnedGroupCounts, occupied, out startIndex);
     }
 
-    // ---------- NEU: Zweistufige Auswahl (erst Gruppe, dann Objekt) ----------
+    // ---------- Zweistufige Auswahl (erst Gruppe, dann Objekt) ----------
 
     SpawnableObject GetRandomWeightedObject(Dictionary<ObjectGroupType, int> spawnedGroupCounts, bool[] occupied, out int startIndex)
     {
