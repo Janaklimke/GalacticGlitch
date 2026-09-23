@@ -70,14 +70,10 @@ public class WormshootablleCollectible : MonoBehaviour
         {
             TakeHit();
             Destroy(collision.gameObject);
+            return;
         }
-    }
 
-    void OnCollisionEnter2D(Collision2D collision)
-    {
-        if (isCollected) return;
-
-        if (collision.collider.CompareTag(playerTag))
+        if (collision.CompareTag(playerTag))
         {
             Collect();
         }
