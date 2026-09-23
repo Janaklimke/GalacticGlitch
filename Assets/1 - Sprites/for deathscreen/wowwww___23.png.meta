@@ -1,0 +1,793 @@
+fileFormatVersion: 2
+guid: 26d182e4c43da034688e1837b3df7f3c
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 4381848262810700231
+    second: wowwww___23_0
+  - first:
+      213: 4292179527864621814
+    second: wowwww___23_1
+  - first:
+      213: 7398039987860287822
+    second: wowwww___23_2
+  - first:
+      213: 5343201460211651891
+    second: wowwww___23_3
+  - first:
+      213: -6706071668476167390
+    second: wowwww___23_4
+  - first:
+      213: -4497026637153762863
+    second: wowwww___23_5
+  - first:
+      213: -9020130168023642206
+    second: wowwww___23_6
+  - first:
+      213: 8652646612150514442
+    second: wowwww___23_7
+  - first:
+      213: -8036481335356010370
+    second: wowwww___23_8
+  - first:
+      213: 4186622266022938735
+    second: wowwww___23_9
+  - first:
+      213: 7214348074915206866
+    second: wowwww___23_10
+  - first:
+      213: 1304137514954084974
+    second: wowwww___23_11
+  - first:
+      213: 3236143616370053319
+    second: wowwww___23_12
+  - first:
+      213: 4807384454993751703
+    second: wowwww___23_13
+  - first:
+      213: 5607835544740605185
+    second: wowwww___23_14
+  - first:
+      213: 5437797526770512860
+    second: wowwww___23_15
+  - first:
+      213: 5148422869995578349
+    second: wowwww___23_16
+  - first:
+      213: 1800070421403519379
+    second: wowwww___23_17
+  - first:
+      213: 351638382246666627
+    second: wowwww___23_18
+  - first:
+      213: -3833964582858147985
+    second: wowwww___23_19
+  - first:
+      213: -3468910851683184797
+    second: wowwww___23_20
+  - first:
+      213: -3290094080242266123
+    second: wowwww___23_21
+  - first:
+      213: 5981738646193850714
+    second: wowwww___23_22
+  - first:
+      213: -6627368196875076340
+    second: wowwww___23_23
+  - first:
+      213: 8505964747236839892
+    second: wowwww___23_24
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 1
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WindowsStoreApps
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: wowwww___23_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 220
+        width: 43
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7c98e7c67c37fcc30800000000000000
+      internalID: 4381848262810700231
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: wowwww___23_1
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 187
+        width: 272
+        height: 45
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6fa13962a82e09b30800000000000000
+      internalID: 4292179527864621814
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: wowwww___23_2
+      rect:
+        serializedVersion: 2
+        x: 78
+        y: 218
+        width: 100
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e413c862c2e1ba660800000000000000
+      internalID: 7398039987860287822
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: wowwww___23_3
+      rect:
+        serializedVersion: 2
+        x: 283
+        y: 183
+        width: 165
+        height: 47
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 33593472b6dd62a40800000000000000
+      internalID: 5343201460211651891
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: wowwww___23_4
+      rect:
+        serializedVersion: 2
+        x: 398
+        y: 213
+        width: 35
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 22bba2a095f3fe2a0800000000000000
+      internalID: -6706071668476167390
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: wowwww___23_5
+      rect:
+        serializedVersion: 2
+        x: 444
+        y: 208
+        width: 72
+        height: 21
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1d10bfa891a5791c0800000000000000
+      internalID: -4497026637153762863
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: wowwww___23_6
+      rect:
+        serializedVersion: 2
+        x: 508
+        y: 205
+        width: 132
+        height: 23
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2af8a23276f02d280800000000000000
+      internalID: -9020130168023642206
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: wowwww___23_7
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 193
+        width: 16
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a03f7340040641870800000000000000
+      internalID: 8652646612150514442
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: wowwww___23_8
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 189
+        width: 7
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e705c0afdcea87090800000000000000
+      internalID: -8036481335356010370
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: wowwww___23_9
+      rect:
+        serializedVersion: 2
+        x: 429
+        y: 188
+        width: 171
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f68c90fe4ced91a30800000000000000
+      internalID: 4186622266022938735
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: wowwww___23_10
+      rect:
+        serializedVersion: 2
+        x: 562
+        y: 180
+        width: 57
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2d61853d9538e1460800000000000000
+      internalID: 7214348074915206866
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: wowwww___23_11
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 175
+        width: 56
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e625915092a391210800000000000000
+      internalID: 1304137514954084974
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: wowwww___23_12
+      rect:
+        serializedVersion: 2
+        x: 205
+        y: 169
+        width: 50
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7c092e7297719ec20800000000000000
+      internalID: 3236143616370053319
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: wowwww___23_13
+      rect:
+        serializedVersion: 2
+        x: 306
+        y: 164
+        width: 143
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 79e23a2f0b247b240800000000000000
+      internalID: 4807384454993751703
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: wowwww___23_14
+      rect:
+        serializedVersion: 2
+        x: 470
+        y: 179
+        width: 51
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 10da21367b803dd40800000000000000
+      internalID: 5607835544740605185
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: wowwww___23_15
+      rect:
+        serializedVersion: 2
+        x: 603
+        y: 172
+        width: 37
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cd377a73a00f67b40800000000000000
+      internalID: 5437797526770512860
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: wowwww___23_16
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 120
+        width: 83
+        height: 54
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: de3659f925fd27740800000000000000
+      internalID: 5148422869995578349
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: wowwww___23_17
+      rect:
+        serializedVersion: 2
+        x: 37
+        y: 159
+        width: 76
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 399c176d2822bf810800000000000000
+      internalID: 1800070421403519379
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: wowwww___23_18
+      rect:
+        serializedVersion: 2
+        x: 127
+        y: 121
+        width: 106
+        height: 44
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 381a43fde3541e400800000000000000
+      internalID: 351638382246666627
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: wowwww___23_19
+      rect:
+        serializedVersion: 2
+        x: 401
+        y: 123
+        width: 239
+        height: 41
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f67bf4d66850bcac0800000000000000
+      internalID: -3833964582858147985
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: wowwww___23_20
+      rect:
+        serializedVersion: 2
+        x: 474
+        y: 163
+        width: 124
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 36f0def95f3fbdfc0800000000000000
+      internalID: -3468910851683184797
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: wowwww___23_21
+      rect:
+        serializedVersion: 2
+        x: 244
+        y: 122
+        width: 122
+        height: 22
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5ff4b8d9ddc3752d0800000000000000
+      internalID: -3290094080242266123
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: wowwww___23_22
+      rect:
+        serializedVersion: 2
+        x: 250
+        y: 143
+        width: 93
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a594c992b97630350800000000000000
+      internalID: 5981738646193850714
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: wowwww___23_23
+      rect:
+        serializedVersion: 2
+        x: 478
+        y: 133
+        width: 48
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c0d3a8dfcbbd604a0800000000000000
+      internalID: -6627368196875076340
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: wowwww___23_24
+      rect:
+        serializedVersion: 2
+        x: 534
+        y: 131
+        width: 59
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4d11c0ffed14b0670800000000000000
+      internalID: 8505964747236839892
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 5e97eb03825dee720800000000000000
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      wowwww___23_0: 4381848262810700231
+      wowwww___23_1: 4292179527864621814
+      wowwww___23_10: 7214348074915206866
+      wowwww___23_11: 1304137514954084974
+      wowwww___23_12: 3236143616370053319
+      wowwww___23_13: 4807384454993751703
+      wowwww___23_14: 5607835544740605185
+      wowwww___23_15: 5437797526770512860
+      wowwww___23_16: 5148422869995578349
+      wowwww___23_17: 1800070421403519379
+      wowwww___23_18: 351638382246666627
+      wowwww___23_19: -3833964582858147985
+      wowwww___23_2: 7398039987860287822
+      wowwww___23_20: -3468910851683184797
+      wowwww___23_21: -3290094080242266123
+      wowwww___23_22: 5981738646193850714
+      wowwww___23_23: -6627368196875076340
+      wowwww___23_24: 8505964747236839892
+      wowwww___23_3: 5343201460211651891
+      wowwww___23_4: -6706071668476167390
+      wowwww___23_5: -4497026637153762863
+      wowwww___23_6: -9020130168023642206
+      wowwww___23_7: 8652646612150514442
+      wowwww___23_8: -8036481335356010370
+      wowwww___23_9: 4186622266022938735
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
