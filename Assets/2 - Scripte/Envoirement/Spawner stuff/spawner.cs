@@ -49,6 +49,14 @@ public class spawner : MonoBehaviour
         [Tooltip("Gewicht dieser GRUPPE beim Auffüllen (Schritt 2). Höher = die Gruppe wird insgesamt öfter gewählt, unabhängig davon wie viele Prefabs sie enthält.")]
         public float groupWeight = 1f;
 
+        [Header("Exklusiv-Wave (z.B. für große Specials wie Rocket)")]
+        [Tooltip("Wenn aktiv: diese Gruppe nimmt NICHT an normalen Waves teil. Stattdessen wird pro Wave gewürfelt, ob diese Gruppe die komplette Wave exklusiv für sich bekommt (nur 1 Objekt aus dieser Gruppe, sonst nichts).")]
+        public bool isExclusiveGroup = false;
+
+        [Tooltip("Wahrscheinlichkeit (0-1) pro Wave, dass diese Gruppe die Wave exklusiv übernimmt. Nur relevant wenn 'Is Exclusive Group' aktiv ist.")]
+        [Range(0f, 1f)]
+        public float exclusiveWaveChance = 0.15f;
+
         [Header("Prefabs in dieser Gruppe")]
         public List<SpawnableObject> spawnableObjects = new List<SpawnableObject>();
     }
@@ -170,6 +178,21 @@ public class spawner : MonoBehaviour
     {
         if (spawnPoints.Length == 0 || groupConfigs.Count == 0) return;
 
+        // Zuerst prüfen, ob eine exklusive Gruppe diese Wave für sich beansprucht.
+        // Reihenfolge = Reihenfolge in der Group-Configs-Liste; die erste Gruppe,
+        // deren Würfelwurf trifft, gewinnt und die Wave endet danach sofort.
+        foreach (var groupConfig in groupConfigs)
+        {
+            if (!groupConfig.isExclusiveGroup) continue;
+            if (groupConfig.spawnableObjects.Count == 0) continue;
+
+            if (Random.value <= groupConfig.exclusiveWaveChance)
+            {
+                SpawnExclusiveWave(groupConfig);
+                return;
+            }
+        }
+
         bool[] occupied = new bool[spawnPoints.Length];
         Dictionary<ObjectGroupType, int> spawnedGroupCounts = new Dictionary<ObjectGroupType, int>();
 
@@ -180,14 +203,20 @@ public class spawner : MonoBehaviour
 
         foreach (var groupConfig in groupConfigs)
         {
+            if (groupConfig.isExclusiveGroup) continue; // nimmt nur exklusiv teil, siehe oben
             if (groupConfig.minPerWave <= 0) continue;
 
             for (int i = 0; i < groupConfig.minPerWave; i++)
             {
                 if (spawnedObjectsInWave >= targetObjectCount) break;
-                if (occupiedSlotsInWave >= maxOccupiedSlotsPerWave) break;
 
-                SpawnableObject chosen = GetRandomObjectFromGroup(groupConfig, spawnedGroupCounts, occupied, out int startIndex);
+                // WICHTIG: verbleibendes Slot-Budget berechnen und Kandidaten
+                // danach filtern lassen, statt erst nach dem Spawn zu merken
+                // dass das Objekt gar nicht mehr reingepasst hätte.
+                int remainingSlots = maxOccupiedSlotsPerWave - occupiedSlotsInWave;
+                if (remainingSlots <= 0) break;
+
+                SpawnableObject chosen = GetRandomObjectFromGroup(groupConfig, spawnedGroupCounts, occupied, remainingSlots, out int startIndex);
                 if (chosen != null && startIndex != -1)
                 {
                     ExecuteSpawn(chosen, groupConfig.groupType, startIndex, occupied, spawnedGroupCounts, ref occupiedSlotsInWave);
@@ -200,13 +229,29 @@ public class spawner : MonoBehaviour
         for (int attempt = 0; attempt < maxAttempts; attempt++)
         {
             if (spawnedObjectsInWave >= targetObjectCount) break;
-            if (occupiedSlotsInWave >= maxOccupiedSlotsPerWave) break;
 
-            SpawnableObject chosen = GetRandomWeightedObject(spawnedGroupCounts, occupied, out int startIndex);
+            int remainingSlots = maxOccupiedSlotsPerWave - occupiedSlotsInWave;
+            if (remainingSlots <= 0) break;
+
+            SpawnableObject chosen = GetRandomWeightedObject(spawnedGroupCounts, occupied, remainingSlots, out int startIndex);
             if (chosen == null || startIndex == -1) break;
 
             ExecuteSpawn(chosen, chosen.parentGroupType, startIndex, occupied, spawnedGroupCounts, ref occupiedSlotsInWave);
             spawnedObjectsInWave++;
+        }
+    }
+
+    void SpawnExclusiveWave(ObjectGroupConfig groupConfig)
+    {
+        bool[] occupied = new bool[spawnPoints.Length];
+        Dictionary<ObjectGroupType, int> dummyCounts = new Dictionary<ObjectGroupType, int>();
+        int occupiedSlotsInWave = 0;
+
+        // Volles Slot-Budget steht zur Verfügung, da noch nichts anderes gespawnt wurde.
+        SpawnableObject chosen = SelectObjectFromCandidateList(groupConfig.spawnableObjects, groupConfig, dummyCounts, occupied, maxOccupiedSlotsPerWave, out int startIndex);
+        if (chosen != null && startIndex != -1)
+        {
+            ExecuteSpawn(chosen, groupConfig.groupType, startIndex, occupied, dummyCounts, ref occupiedSlotsInWave);
         }
     }
 
@@ -229,7 +274,7 @@ public class spawner : MonoBehaviour
         GameObject spawned = Instantiate(chosen.prefab, spawnPos, Quaternion.identity);
         activeObjects.Add(spawned);
 
-        WormshootablleCollectible collectable = spawned.GetComponent<WormshootablleCollectible>();
+        WormshootablleCollectible collectable = spawned.GetComponentInChildren<WormshootablleCollectible>();
         if (collectable != null)
         {
             collectable.Init(collectCanvas);
@@ -278,14 +323,14 @@ public class spawner : MonoBehaviour
         return validStarts;
     }
 
-    SpawnableObject GetRandomObjectFromGroup(ObjectGroupConfig groupConfig, Dictionary<ObjectGroupType, int> spawnedGroupCounts, bool[] occupied, out int startIndex)
+    SpawnableObject GetRandomObjectFromGroup(ObjectGroupConfig groupConfig, Dictionary<ObjectGroupType, int> spawnedGroupCounts, bool[] occupied, int remainingSlots, out int startIndex)
     {
         startIndex = -1;
-        return SelectObjectFromCandidateList(groupConfig.spawnableObjects, groupConfig, spawnedGroupCounts, occupied, out startIndex);
+        return SelectObjectFromCandidateList(groupConfig.spawnableObjects, groupConfig, spawnedGroupCounts, occupied, remainingSlots, out startIndex);
     }
 
 
-    SpawnableObject GetRandomWeightedObject(Dictionary<ObjectGroupType, int> spawnedGroupCounts, bool[] occupied, out int startIndex)
+    SpawnableObject GetRandomWeightedObject(Dictionary<ObjectGroupType, int> spawnedGroupCounts, bool[] occupied, int remainingSlots, out int startIndex)
     {
         startIndex = -1;
 
@@ -294,6 +339,7 @@ public class spawner : MonoBehaviour
 
         foreach (var groupConfig in groupConfigs)
         {
+            if (groupConfig.isExclusiveGroup) continue; // nimmt nur exklusiv teil, siehe SpawnWave
             if (groupConfig.groupWeight <= 0f) continue;
 
             int currentInWave = spawnedGroupCounts.ContainsKey(groupConfig.groupType) ? spawnedGroupCounts[groupConfig.groupType] : 0;
@@ -304,6 +350,11 @@ public class spawner : MonoBehaviour
             foreach (var obj in groupConfig.spawnableObjects)
             {
                 if (obj.spawnChance <= 0f) continue;
+
+                // NEU: Objekt überspringen, wenn es nicht mehr ins verbleibende
+                // Slot-Budget der Wave passt.
+                if (obj.sizeInSlots > remainingSlots) continue;
+
                 obj.parentGroupType = groupConfig.groupType;
 
                 int[] allowedIndices = obj.useSpecificSpawnPoints ? GetAllowedIndices(obj) : null;
@@ -358,7 +409,7 @@ public class spawner : MonoBehaviour
         return null;
     }
 
-    SpawnableObject SelectObjectFromCandidateList(List<SpawnableObject> candidates, ObjectGroupConfig singleGroupConfig, Dictionary<ObjectGroupType, int> spawnedGroupCounts, bool[] occupied, out int startIndex)
+    SpawnableObject SelectObjectFromCandidateList(List<SpawnableObject> candidates, ObjectGroupConfig singleGroupConfig, Dictionary<ObjectGroupType, int> spawnedGroupCounts, bool[] occupied, int remainingSlots, out int startIndex)
     {
         startIndex = -1;
         List<(SpawnableObject obj, List<int> validStarts)> available = new List<(SpawnableObject, List<int>)>();
@@ -366,6 +417,10 @@ public class spawner : MonoBehaviour
         foreach (var obj in candidates)
         {
             if (obj.spawnChance <= 0f) continue;
+
+            // NEU: Objekt überspringen, wenn es nicht mehr ins verbleibende
+            // Slot-Budget der Wave passt.
+            if (obj.sizeInSlots > remainingSlots) continue;
 
             // Gruppen-Regel Max-Per-Wave prüfen
             ObjectGroupConfig groupConfig = singleGroupConfig ?? groupConfigs.Find(g => g.spawnableObjects.Contains(obj));
