@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.SocialPlatforms.Impl;
 
@@ -14,6 +15,18 @@ public class GameManager : MonoBehaviour
     public ScoreSaver highScores;
     public NameEntryUI nameEntryUI;
     public LeaderboardUI leaderboardUI;
+
+    [Header("Random Event Canvas")]
+    [Tooltip("Canvas, das in zufälligen Abständen aktiviert wird.")]
+    public GameObject randomEventCanvas;
+    [Tooltip("Minimale Wartezeit in Sekunden, bevor das Canvas aktiviert wird.")]
+    public float minInterval = 5f;
+    [Tooltip("Maximale Wartezeit in Sekunden, bevor das Canvas aktiviert wird.")]
+    public float maxInterval = 15f;
+    [Tooltip("Wie lange das Canvas sichtbar bleibt, bevor es wieder deaktiviert wird.")]
+    public float displayDuration = 2f;
+
+    private Coroutine randomEventRoutine;
 
     void Awake()
     {
@@ -35,6 +48,12 @@ public class GameManager : MonoBehaviour
         CurrentState = GameState.Playing;
         startScreenCanvas.SetActive(false);
         gameOverCanvas.SetActive(false);
+
+        if (randomEventCanvas != null)
+        {
+            randomEventCanvas.SetActive(false);
+            randomEventRoutine = StartCoroutine(RandomEventCanvasLoop());
+        }
     }
 
     public void GameOver()
@@ -42,8 +61,10 @@ public class GameManager : MonoBehaviour
         CurrentState = GameState.GameOver;
         gameOverCanvas.SetActive(true);
 
+        StopRandomEventCanvas();
+
         int finalScore = PointManager.Instance.Points;
-        nameEntryUI.Show(finalScore); 
+        nameEntryUI.Show(finalScore);
     }
 
     public void SubmitScore(string name, int finalScore)
@@ -57,11 +78,42 @@ public class GameManager : MonoBehaviour
         CurrentState = GameState.Menu;
         startScreenCanvas.SetActive(true);
         gameOverCanvas.SetActive(false);
+
+        StopRandomEventCanvas();
     }
 
     public void RestartGame()
     {
         UnityEngine.SceneManagement.SceneManager.LoadScene(
             UnityEngine.SceneManagement.SceneManager.GetActiveScene().buildIndex);
+    }
+
+    private IEnumerator RandomEventCanvasLoop()
+    {
+        while (CurrentState == GameState.Playing)
+        {
+            float wait = Random.Range(minInterval, maxInterval);
+            yield return new WaitForSeconds(wait);
+
+            if (CurrentState != GameState.Playing) yield break;
+
+            randomEventCanvas.SetActive(true);
+            yield return new WaitForSeconds(displayDuration);
+
+            if (randomEventCanvas != null)
+                randomEventCanvas.SetActive(false);
+        }
+    }
+
+    private void StopRandomEventCanvas()
+    {
+        if (randomEventRoutine != null)
+        {
+            StopCoroutine(randomEventRoutine);
+            randomEventRoutine = null;
+        }
+
+        if (randomEventCanvas != null)
+            randomEventCanvas.SetActive(false);
     }
 }
