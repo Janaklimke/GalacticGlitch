@@ -40,6 +40,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 9127928198008110516}
+  - component: {fileID: 7784544960474323467}
   - component: {fileID: 5670477704320762891}
   - component: {fileID: 2389281671389429833}
   - component: {fileID: 3016332759795063813}
@@ -49,7 +50,7 @@ GameObject:
   - component: {fileID: 5515105111455808631}
   m_Layer: 0
   m_Name: Appa
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -70,6 +71,26 @@ Transform:
   - {fileID: 8816007337488169908}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &7784544960474323467
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3341151365745328368}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 06bde71ba77980141ac420dbcb252307, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  glitchTag: Glitch
+  baseSpeed: 4
+  dashSpeedMultiplier: 2.5
+  speedSmoothing: 8
+  dashDuration: 1.2
+  invincibleExtraTime: 0.3
+  playerCollider: {fileID: 0}
+  animator: {fileID: 0}
 --- !u!114 &5670477704320762891
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -175,7 +196,7 @@ Rigidbody2D:
   m_Mass: 1
   m_LinearDamping: 0
   m_AngularDamping: 0.05
-  m_GravityScale: 1
+  m_GravityScale: 0
   m_Material: {fileID: 0}
   m_IncludeLayers:
     serializedVersion: 2
@@ -186,7 +207,7 @@ Rigidbody2D:
   m_Interpolate: 0
   m_SleepingMode: 1
   m_CollisionDetection: 0
-  m_Constraints: 0
+  m_Constraints: 4
 --- !u!61 &683396481624854188
 BoxCollider2D:
   m_ObjectHideFlags: 0

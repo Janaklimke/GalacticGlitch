@@ -38,11 +38,6 @@ public class WormshootablleCollectible : MonoBehaviour
         currentHits = randomHitsToDestroy
             ? Random.Range(minRandomHits, maxRandomHits + 1)
             : hitsToDestroy;
-
-        if (canvasToShow != null)
-        {
-            canvasToShow.SetActive(false);
-        }
     }
 
     public void TakeHit()
@@ -64,6 +59,7 @@ public class WormshootablleCollectible : MonoBehaviour
 
     void OnTriggerEnter2D(Collider2D collision)
     {
+        Debug.Log($"Trigger entered by: {collision.gameObject.name}, tag: {collision.tag}");
         if (isCollected) return;
 
         if (collision.CompareTag("Bullet"))

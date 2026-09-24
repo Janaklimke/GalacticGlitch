@@ -96,6 +96,12 @@ public class spawner : MonoBehaviour
         currentSpeed = startSpeed;
         CurrentDifficultySpeed = currentSpeed;
         SpawnerActive = true;
+
+        if (collectCanvas != null)
+        {
+            collectCanvas.SetActive(false);
+        }
+
         SetNextSpawnTime();
     }
 
