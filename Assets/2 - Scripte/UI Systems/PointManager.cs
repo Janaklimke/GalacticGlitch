@@ -20,6 +20,13 @@ public class PointManager : MonoBehaviour
         StartCoroutine(AddPoints());
     }
 
+    void Update()
+    {
+        bool shouldShow = GameManager.Instance.CurrentState == GameManager.GameState.Playing;
+        if (texts.gameObject.activeSelf != shouldShow)
+            texts.gameObject.SetActive(shouldShow);
+    }
+
     IEnumerator AddPoints()
     {
         while (true)

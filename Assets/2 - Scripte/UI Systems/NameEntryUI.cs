@@ -1,11 +1,10 @@
 using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class NameEntryUI : MonoBehaviour
 {
     public TMP_InputField nameInput;
-    public Button confirmButton;
+    public LeaderboardUI leaderboardUI; // hidden while typing, shown again after confirm
 
     int pendingScore;
 
@@ -13,14 +12,17 @@ public class NameEntryUI : MonoBehaviour
     {
         nameInput.characterLimit = 4;
         nameInput.onValueChanged.AddListener(OnInputChanged);
-        confirmButton.onClick.AddListener(Confirm);
+        nameInput.onSubmit.AddListener(OnSubmit); // fires when Enter is pressed in the field
     }
 
     // Call this when the game over screen appears
     public void Show(int finalScore)
     {
         pendingScore = finalScore;
-        nameInput.text = "XXXX";
+        nameInput.text = "";
+
+        if (leaderboardUI != null)
+            leaderboardUI.SetVisible(false); // hide leaderboard while typing
 
         gameObject.SetActive(true);
         nameInput.Select();
@@ -29,7 +31,7 @@ public class NameEntryUI : MonoBehaviour
 
     void OnInputChanged(string value)
     {
-        // Strip anything that isn't a letter, force uppercase
+        // Strip anything that isn't a letter, force uppercase, keep cursor sane
         string filtered = "";
         foreach (char c in value)
         {
@@ -42,8 +44,20 @@ public class NameEntryUI : MonoBehaviour
             nameInput.text = filtered;
             nameInput.caretPosition = filtered.Length;
         }
+    }
 
-        confirmButton.interactable = (filtered.Length == 4);
+    void OnSubmit(string value)
+    {
+        Confirm();
+    }
+
+    void Update()
+    {
+        if (nameInput.text.Length == 4 &&
+            (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter)))
+        {
+            Confirm();
+        }
     }
 
     void Confirm()
@@ -53,5 +67,8 @@ public class NameEntryUI : MonoBehaviour
 
         GameManager.Instance.SubmitScore(name, pendingScore);
         gameObject.SetActive(false);
+
+        if (leaderboardUI != null)
+            leaderboardUI.SetVisible(true); 
     }
 }

@@ -8,7 +8,13 @@ public class LeaderboardUI : MonoBehaviour
     public TMP_Text leaderboardText;
     public TMP_Text finalScoreText; 
     public string highlightColor = "#FFD700"; // yellow
+    public GameObject panelToToggle; 
 
+    public void SetVisible(bool visible)
+    {
+        if (panelToToggle != null)
+            panelToToggle.SetActive(visible);
+    }
     public void Refresh(ScoreSaver.ScoreEntry highlightEntry, int finalScore)
     {
         if (finalScoreText != null)
