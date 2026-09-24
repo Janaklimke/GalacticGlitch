@@ -176,10 +176,8 @@ public class spawner : MonoBehaviour
         int occupiedSlotsInWave = 0;
         int spawnedObjectsInWave = 0;
 
-        // Am Anfang der Wave festlegen, wie viele OBJEKTE (nicht Slots!) diese Wave haben soll
         int targetObjectCount = Random.Range(minObjectsPerWave, maxObjectsPerWave + 1);
 
-        // 1. ZUERST MINDEST-ANFORDERUNGEN DER GRUPPEN SPAWNEN (minPerWave)
         foreach (var groupConfig in groupConfigs)
         {
             if (groupConfig.minPerWave <= 0) continue;
@@ -198,7 +196,6 @@ public class spawner : MonoBehaviour
             }
         }
 
-        // 2. WEITERE OBJEKTE AUFFÜLLEN, BIS DIE ZIEL-ANZAHL ERREICHT IST
         int maxAttempts = spawnPoints.Length;
         for (int attempt = 0; attempt < maxAttempts; attempt++)
         {
@@ -215,13 +212,11 @@ public class spawner : MonoBehaviour
 
     void ExecuteSpawn(SpawnableObject chosen, ObjectGroupType groupType, int startIndex, bool[] occupied, Dictionary<ObjectGroupType, int> spawnedGroupCounts, ref int occupiedSlots)
     {
-        // Slots im Array als belegt markieren
         for (int i = startIndex; i < startIndex + chosen.sizeInSlots; i++)
         {
             if (i < occupied.Length) occupied[i] = true;
         }
 
-        // Position berechnen
         Vector3 spawnPos = spawnPoints[startIndex].position;
         if (chosen.sizeInSlots > 1)
         {
@@ -231,12 +226,9 @@ public class spawner : MonoBehaviour
             spawnPos = (posA + posB) / 2f;
         }
 
-        // Instanziieren
         GameObject spawned = Instantiate(chosen.prefab, spawnPos, Quaternion.identity);
         activeObjects.Add(spawned);
 
-        // Falls es ein Collectable-Worm ist, Canvas-Referenz aus der Szene mitgeben,
-        // da das Prefab selbst kein Szenen-Objekt referenzieren kann.
         WormshootablleCollectible collectable = spawned.GetComponent<WormshootablleCollectible>();
         if (collectable != null)
         {
@@ -292,14 +284,11 @@ public class spawner : MonoBehaviour
         return SelectObjectFromCandidateList(groupConfig.spawnableObjects, groupConfig, spawnedGroupCounts, occupied, out startIndex);
     }
 
-    // ---------- Zweistufige Auswahl (erst Gruppe, dann Objekt) ----------
 
     SpawnableObject GetRandomWeightedObject(Dictionary<ObjectGroupType, int> spawnedGroupCounts, bool[] occupied, out int startIndex)
     {
         startIndex = -1;
 
-        // 1. Alle Gruppen sammeln, die noch spawnen dürfen (maxPerWave nicht erreicht)
-        //    und mind. ein gültiges (platzierbares) Objekt haben.
         List<(ObjectGroupConfig group, List<(SpawnableObject obj, List<int> validStarts)> validObjs)> eligibleGroups
             = new List<(ObjectGroupConfig, List<(SpawnableObject, List<int>)>)>();
 
@@ -330,7 +319,6 @@ public class spawner : MonoBehaviour
 
         if (eligibleGroups.Count == 0) return null;
 
-        // 2. Gruppe gewichtet nach groupWeight auswählen
         float totalGroupWeight = 0f;
         foreach (var entry in eligibleGroups) totalGroupWeight += entry.group.groupWeight;
 
@@ -351,7 +339,6 @@ public class spawner : MonoBehaviour
 
         if (chosenGroupObjects == null) return null;
 
-        // 3. Innerhalb der gewählten Gruppe: Objekt gewichtet nach spawnChance auswählen
         float totalObjWeight = 0f;
         foreach (var c in chosenGroupObjects) totalObjWeight += c.obj.spawnChance;
 
