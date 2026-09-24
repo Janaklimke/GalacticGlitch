@@ -14,6 +14,10 @@ public class PlayerMovement : MonoBehaviour
     [Header("Animation")]
     public Animator animator;
 
+    [Header("Audio")]
+    public AudioSource audioSource; 
+    public AudioClip deathSound;
+
     private Rigidbody2D rb;
     private Glitchdash glitchdash;
     private bool isStarting = false;
@@ -76,11 +80,13 @@ public class PlayerMovement : MonoBehaviour
 
     public void Die()
     {
+        if (deathSound != null)
+            AudioSource.PlayClipAtPoint(deathSound, transform.position);
+
         if (GameManager.Instance.CurrentState == GameManager.GameState.GameOver)
             return;
 
         if (animator != null) animator.SetBool("death", true);
-
         rb.gravityScale = startingGravityScale;
         rb.linearVelocity = Vector2.zero;
 

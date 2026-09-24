@@ -1,6 +1,5 @@
 using System.Collections;
 using UnityEngine;
-using UnityEngine.SocialPlatforms.Impl;
 
 public class GameManager : MonoBehaviour
 {
@@ -28,6 +27,10 @@ public class GameManager : MonoBehaviour
 
     private Coroutine randomEventRoutine;
 
+    [Header("Music")]
+    public AudioSource menuMusicSource;   // menu + game over music, Loop checked, Play On Awake off
+    public AudioSource gameplayMusicSource; // in-game music, Loop checked, Play On Awake off
+
     void Awake()
     {
         if (Instance != null && Instance != this)
@@ -48,12 +51,13 @@ public class GameManager : MonoBehaviour
         CurrentState = GameState.Playing;
         startScreenCanvas.SetActive(false);
         gameOverCanvas.SetActive(false);
-
         if (randomEventCanvas != null)
         {
             randomEventCanvas.SetActive(false);
             randomEventRoutine = StartCoroutine(RandomEventCanvasLoop());
         }
+        PlayGameplayMusic();
+
     }
 
     public void GameOver()
@@ -65,6 +69,8 @@ public class GameManager : MonoBehaviour
 
         int finalScore = PointManager.Instance.Points;
         nameEntryUI.Show(finalScore);
+
+        PlayMenuMusic();
     }
 
     public void SubmitScore(string name, int finalScore)
@@ -78,8 +84,20 @@ public class GameManager : MonoBehaviour
         CurrentState = GameState.Menu;
         startScreenCanvas.SetActive(true);
         gameOverCanvas.SetActive(false);
-
         StopRandomEventCanvas();
+        PlayMenuMusic();
+    }
+
+    void PlayMenuMusic()
+    {
+        if (gameplayMusicSource != null) gameplayMusicSource.Stop();
+        if (menuMusicSource != null && !menuMusicSource.isPlaying) menuMusicSource.Play();
+    }
+
+    void PlayGameplayMusic()
+    {
+        if (menuMusicSource != null) menuMusicSource.Stop();
+        if (gameplayMusicSource != null && !gameplayMusicSource.isPlaying) gameplayMusicSource.Play();
     }
 
     public void RestartGame()

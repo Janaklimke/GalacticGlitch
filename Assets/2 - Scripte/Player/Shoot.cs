@@ -10,7 +10,11 @@ public class Shoot : MonoBehaviour
     public KeyCode shootKey = KeyCode.Mouse0;
 
     [Header("Animation")]
-    public Animator animator; // NEU: steuert den "pew"-Trigger
+    public Animator animator;
+
+    [Header("Audio")]
+    public AudioSource audioSource; // auto-grabbed from this object if left empty
+    public AudioClip shootSound;
 
     private PlayerMovement playerMovement;
 
@@ -18,8 +22,8 @@ public class Shoot : MonoBehaviour
     {
         playerMovement = GetComponent<PlayerMovement>();
 
-        // NEU: Falls im Inspector nicht gesetzt, eigenen Animator verwenden
         if (animator == null) animator = GetComponent<Animator>();
+        if (audioSource == null) audioSource = GetComponent<AudioSource>();
     }
 
     void Update()
@@ -55,5 +59,9 @@ public class Shoot : MonoBehaviour
         }
 
         if (animator != null) animator.SetTrigger("pew");
+
+        if (audioSource != null && shootSound != null)
+            audioSource.PlayOneShot(shootSound);
     }
 }
+

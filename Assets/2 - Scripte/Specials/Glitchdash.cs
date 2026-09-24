@@ -20,7 +20,11 @@ public class Glitchdash : MonoBehaviour
     public Collider2D playerCollider;
 
     [Header("Animation")]
-    public Animator animator; // NEU: steuert den "glitch"-Trigger im Animator Controller
+    public Animator animator; // steuert den "glitch"-Trigger im Animator Controller
+
+    [Header("Audio")]
+    public AudioSource audioSource; // auto-grabbed from this object if left empty
+    public AudioClip dashSound;
 
     // Everything that scrolls reads this
     public static float WorldSpeed { get; private set; }
@@ -43,6 +47,7 @@ public class Glitchdash : MonoBehaviour
         if (playerCollider == null) playerCollider = GetComponent<Collider2D>();
 
         if (animator == null) animator = GetComponent<Animator>();
+        if (audioSource == null) audioSource = GetComponent<AudioSource>();
     }
 
     void Update()
@@ -87,6 +92,9 @@ public class Glitchdash : MonoBehaviour
     {
         dashTimer = dashDuration;
         invincibleTimer = dashDuration + invincibleExtraTime;
+
+        if (audioSource != null && dashSound != null)
+            audioSource.PlayOneShot(dashSound);
 
         Destroy(glitch);
     }
