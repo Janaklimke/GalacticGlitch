@@ -49,7 +49,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   pullRadius: 5
-  pullStrength: 90
+  pullStrength: 75
   verticalOnly: 1
   killsInvincible: 0
 --- !u!212 &1449602775023158622
