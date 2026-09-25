@@ -1,9 +1,11 @@
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class NameEntryUI : MonoBehaviour
 {
     public TMP_InputField nameInput;
+    public Button confirmButton; // optional - clicking this does the same as pressing Enter
     public LeaderboardUI leaderboardUI; // hidden while typing, shown again after confirm
 
     int pendingScore;
@@ -13,6 +15,9 @@ public class NameEntryUI : MonoBehaviour
         nameInput.characterLimit = 4;
         nameInput.onValueChanged.AddListener(OnInputChanged);
         nameInput.onSubmit.AddListener(OnSubmit); // fires when Enter is pressed in the field
+
+        if (confirmButton != null)
+            confirmButton.onClick.AddListener(Confirm);
     }
 
     // Call this when the game over screen appears
@@ -20,6 +25,8 @@ public class NameEntryUI : MonoBehaviour
     {
         pendingScore = finalScore;
         nameInput.text = "";
+
+        UpdateButtonState();
 
         if (leaderboardUI != null)
             leaderboardUI.SetVisible(false); // hide leaderboard while typing
@@ -44,6 +51,14 @@ public class NameEntryUI : MonoBehaviour
             nameInput.text = filtered;
             nameInput.caretPosition = filtered.Length;
         }
+
+        UpdateButtonState();
+    }
+
+    void UpdateButtonState()
+    {
+        if (confirmButton != null)
+            confirmButton.interactable = (nameInput.text.Length == 4);
     }
 
     void OnSubmit(string value)
@@ -63,12 +78,12 @@ public class NameEntryUI : MonoBehaviour
     void Confirm()
     {
         string name = nameInput.text;
-        if (name.Length != 4) return; 
+        if (name.Length != 4) return;
 
         GameManager.Instance.SubmitScore(name, pendingScore);
         gameObject.SetActive(false);
 
         if (leaderboardUI != null)
-            leaderboardUI.SetVisible(true); 
+            leaderboardUI.SetVisible(true);
     }
 }

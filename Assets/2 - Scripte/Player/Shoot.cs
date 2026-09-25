@@ -13,8 +13,9 @@ public class Shoot : MonoBehaviour
     public Animator animator;
 
     [Header("Audio")]
-    public AudioSource audioSource; // auto-grabbed from this object if left empty
+    public AudioSource audioSource;
     public AudioClip shootSound;
+    public float shootVolume = 0.3f;
 
     private PlayerMovement playerMovement;
 
@@ -59,9 +60,8 @@ public class Shoot : MonoBehaviour
         }
 
         if (animator != null) animator.SetTrigger("pew");
-
         if (audioSource != null && shootSound != null)
-            audioSource.PlayOneShot(shootSound);
+            audioSource.PlayOneShot(shootSound, shootVolume);
     }
 }
 

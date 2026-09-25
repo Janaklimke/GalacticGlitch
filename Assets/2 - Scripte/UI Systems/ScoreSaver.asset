@@ -12,4 +12,34 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5572076e9fa8fe549ac553944ebce884, type: 3}
   m_Name: ScoreSaver
   m_EditorClassIdentifier: 
-  topScores: []
+  topScores:
+  - playerName: LOLD
+    score: 675
+    date: 2026-09-24 15:07
+  - playerName: MEOW
+    score: 309
+    date: 2026-09-24 14:59
+  - playerName: CHIL
+    score: 109
+    date: 2026-09-24 14:30
+  - playerName: MEEE
+    score: 86
+    date: 2026-09-24 11:46
+  - playerName: JUUZ
+    score: 64
+    date: 2026-09-24 14:23
+  - playerName: DAVE
+    score: 54
+    date: 2026-09-24 11:56
+  - playerName: IJEI
+    score: 54
+    date: 2026-09-24 14:54
+  - playerName: MARI
+    score: 46
+    date: 2026-09-24 12:09
+  - playerName: MJUU
+    score: 40
+    date: 2026-09-24 13:58
+  - playerName: MIAA
+    score: 37
+    date: 2026-09-24 14:18

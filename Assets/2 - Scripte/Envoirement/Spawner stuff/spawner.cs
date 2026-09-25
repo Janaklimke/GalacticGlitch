@@ -64,12 +64,6 @@ public class spawner : MonoBehaviour
     [Header("Gruppen-Konfigurationen")]
     public List<ObjectGroupConfig> groupConfigs = new List<ObjectGroupConfig>();
 
-    [Header("Objekt-Anzahl pro Wave")]
-    [Tooltip("Minimale Anzahl an Objekten (NICHT Slots!) pro Wave")]
-    public int minObjectsPerWave = 1;
-    [Tooltip("Maximale Anzahl an Objekten (NICHT Slots!) pro Wave")]
-    public int maxObjectsPerWave = 3;
-
     [Header("Spawn Line Limits")]
     [Tooltip("Maximale Gesamtzahl an belegten Slots pro Spawn Line (z.B. max 2 von 4 Slots belegen)")]
     public int maxOccupiedSlotsPerWave = 2;
@@ -86,6 +80,21 @@ public class spawner : MonoBehaviour
     public float maxSpeed = 8f;
     public float speedIncreasePerSecond = 0.05f;
 
+    [Header("Difficulty Ramp (spawn rate + wave size over time)")]
+    [Tooltip("Nach dieser vielen Sekunden Spielzeit ist die Schwierigkeit voll aufgedreht (schnellste Intervalle, Kurven-Ende erreicht).")]
+    public float difficultyRampDuration = 120f;
+    [Tooltip("Spawn-Intervalle am Ende der Ramp (schneller = härter). Muss kleiner sein als min/maxSpawnInterval oben.")]
+    public float minSpawnIntervalAtMaxDifficulty = 0.6f;
+    public float maxSpawnIntervalAtMaxDifficulty = 1.2f;
+
+    [Tooltip("Min. Objekte pro Wave über die Zeit. X-Achse = 0 (Start) bis 1 (voll aufgedreht nach Difficulty Ramp Duration). Y-Achse = Objektanzahl. Frei formbar - kann auch wieder absinken, z.B. 1 -> 1 -> 2 -> 2 -> 3.")]
+    public AnimationCurve minObjectsPerWaveCurve = AnimationCurve.Linear(0f, 1f, 1f, 2f);
+    [Tooltip("Max. Objekte pro Wave über die Zeit. Gleiche X/Y-Logik wie oben. Z.B. 2 am Anfang -> 4 in der Mitte -> 3 danach, ganz wie du willst.")]
+    public AnimationCurve maxObjectsPerWaveCurve = AnimationCurve.Linear(0f, 2f, 1f, 5f);
+
+    [Tooltip("Zusätzliche belegbare Slots pro Wave am Ende der Ramp.")]
+    public int extraOccupiedSlotsAtMaxDifficulty = 2;
+
     [Header("Collectable Settings")]
     [Tooltip("Wird an gespawnte Collectables (z.B. Worms) weitergegeben, da Prefabs selbst keine Szenen-Objekte referenzieren können.")]
     public GameObject collectCanvas;
@@ -93,6 +102,7 @@ public class spawner : MonoBehaviour
     private float currentSpeed;
     private float timer;
     private float nextSpawnTime;
+    private float difficultyTime; // Sekunden, die der Spieler aktiv im Playing-State verbracht hat
 
     private List<GameObject> activeObjects = new List<GameObject>();
 
@@ -123,6 +133,8 @@ public class spawner : MonoBehaviour
         if (GameManager.Instance.CurrentState != GameManager.GameState.Playing)
             return;
 
+        difficultyTime += Time.deltaTime;
+
         if (currentSpeed < maxSpeed)
         {
             currentSpeed += speedIncreasePerSecond * Time.deltaTime;
@@ -142,6 +154,13 @@ public class spawner : MonoBehaviour
             SpawnWave();
             SetNextSpawnTime();
         }
+    }
+
+    // 0 at the start of a run, 1 once difficultyRampDuration has passed
+    float DifficultyProgress()
+    {
+        if (difficultyRampDuration <= 0f) return 1f;
+        return Mathf.Clamp01(difficultyTime / difficultyRampDuration);
     }
 
     float GetDashMultiplier()
@@ -171,12 +190,23 @@ public class spawner : MonoBehaviour
 
     void SetNextSpawnTime()
     {
-        nextSpawnTime = Random.Range(minSpawnInterval, maxSpawnInterval);
+        float t = DifficultyProgress();
+
+        float min = Mathf.Lerp(minSpawnInterval, minSpawnIntervalAtMaxDifficulty, t);
+        float max = Mathf.Lerp(maxSpawnInterval, maxSpawnIntervalAtMaxDifficulty, t);
+
+        nextSpawnTime = Random.Range(min, max);
     }
 
     void SpawnWave()
     {
         if (spawnPoints.Length == 0 || groupConfigs.Count == 0) return;
+
+        float t = DifficultyProgress();
+
+        int currentMinObjectsPerWave = Mathf.Max(0, Mathf.RoundToInt(minObjectsPerWaveCurve.Evaluate(t)));
+        int currentMaxObjectsPerWave = Mathf.Max(currentMinObjectsPerWave, Mathf.RoundToInt(maxObjectsPerWaveCurve.Evaluate(t)));
+        int currentMaxOccupiedSlots = maxOccupiedSlotsPerWave + Mathf.RoundToInt(extraOccupiedSlotsAtMaxDifficulty * t);
 
         // Zuerst prüfen, ob eine exklusive Gruppe diese Wave für sich beansprucht.
         // Reihenfolge = Reihenfolge in der Group-Configs-Liste; die erste Gruppe,
@@ -188,7 +218,7 @@ public class spawner : MonoBehaviour
 
             if (Random.value <= groupConfig.exclusiveWaveChance)
             {
-                SpawnExclusiveWave(groupConfig);
+                SpawnExclusiveWave(groupConfig, currentMaxOccupiedSlots);
                 return;
             }
         }
@@ -199,7 +229,7 @@ public class spawner : MonoBehaviour
         int occupiedSlotsInWave = 0;
         int spawnedObjectsInWave = 0;
 
-        int targetObjectCount = Random.Range(minObjectsPerWave, maxObjectsPerWave + 1);
+        int targetObjectCount = Random.Range(currentMinObjectsPerWave, currentMaxObjectsPerWave + 1);
 
         foreach (var groupConfig in groupConfigs)
         {
@@ -213,7 +243,7 @@ public class spawner : MonoBehaviour
                 // WICHTIG: verbleibendes Slot-Budget berechnen und Kandidaten
                 // danach filtern lassen, statt erst nach dem Spawn zu merken
                 // dass das Objekt gar nicht mehr reingepasst hätte.
-                int remainingSlots = maxOccupiedSlotsPerWave - occupiedSlotsInWave;
+                int remainingSlots = currentMaxOccupiedSlots - occupiedSlotsInWave;
                 if (remainingSlots <= 0) break;
 
                 SpawnableObject chosen = GetRandomObjectFromGroup(groupConfig, spawnedGroupCounts, occupied, remainingSlots, out int startIndex);
@@ -230,7 +260,7 @@ public class spawner : MonoBehaviour
         {
             if (spawnedObjectsInWave >= targetObjectCount) break;
 
-            int remainingSlots = maxOccupiedSlotsPerWave - occupiedSlotsInWave;
+            int remainingSlots = currentMaxOccupiedSlots - occupiedSlotsInWave;
             if (remainingSlots <= 0) break;
 
             SpawnableObject chosen = GetRandomWeightedObject(spawnedGroupCounts, occupied, remainingSlots, out int startIndex);
@@ -241,14 +271,14 @@ public class spawner : MonoBehaviour
         }
     }
 
-    void SpawnExclusiveWave(ObjectGroupConfig groupConfig)
+    void SpawnExclusiveWave(ObjectGroupConfig groupConfig, int currentMaxOccupiedSlots)
     {
         bool[] occupied = new bool[spawnPoints.Length];
         Dictionary<ObjectGroupType, int> dummyCounts = new Dictionary<ObjectGroupType, int>();
         int occupiedSlotsInWave = 0;
 
         // Volles Slot-Budget steht zur Verfügung, da noch nichts anderes gespawnt wurde.
-        SpawnableObject chosen = SelectObjectFromCandidateList(groupConfig.spawnableObjects, groupConfig, dummyCounts, occupied, maxOccupiedSlotsPerWave, out int startIndex);
+        SpawnableObject chosen = SelectObjectFromCandidateList(groupConfig.spawnableObjects, groupConfig, dummyCounts, occupied, currentMaxOccupiedSlots, out int startIndex);
         if (chosen != null && startIndex != -1)
         {
             ExecuteSpawn(chosen, groupConfig.groupType, startIndex, occupied, dummyCounts, ref occupiedSlotsInWave);

@@ -8,9 +8,12 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/Scenes/SampleScene.unity
     guid: 8c9cfa26abfee488c85f1582747f6a02
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/JanaTest/TestingJana.unity
     guid: 98d1b71934b35034780607b8702cea1f
+  - enabled: 1
+    path: Assets/JuuzFolder/Potential Final.unity
+    guid: 13b9ba2f17b34a041971baa3c2844430
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
   m_UseUCBPForAssetBundles: 0
